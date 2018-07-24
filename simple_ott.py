@@ -1,5 +1,4 @@
 import tensorflow as tf
-import t3f
 import numpy as np
 
 from pymanopt import Problem
@@ -21,7 +20,7 @@ if __name__ == "__main__":
 
 
 	# Generate random data
-	X_gt = t3f.random_tensor(Ns, tt_rank=tt_ranks, mean=0., stddev=1.)
+	X_gt = np.random.randn(n1,n2).astype('float32')
 
 	Q1 = tf.Variable(tf.zeros([r0*n1,r1])) # 5 X 3
 	Q2 = tf.Variable(tf.zeros([r1*n2,r2])) # 9 X 1
@@ -29,12 +28,12 @@ if __name__ == "__main__":
 
 	U1 = tf.reshape(Q1,[r0,n1,r1]) # 1 X 5 X 3
 	U2 = tf.reshape(Q2,[r1,n2,r2]) # 3 X 3 X 1
-	U2 = tf.einsum('abc,c->abc',U2,R2) # 3 X 3 X 1
+	U2 = tf.multiply(U2,R2) # 3 X 3 X 1
 
 	# Cost function is the sqaured test error
 	X_hat = tf.einsum('abc,cde->bd',U1,U2) # 5 X 3
 
-	cost = tf.reduce_mean(tf.square(X_hat - t3f.full(X_gt))) # scalar
+	cost = tf.reduce_mean(tf.square(X_hat - X_gt)) # scalar
 
 	# first-order, second-order
 	#solver = TrustRegions()
@@ -51,4 +50,4 @@ if __name__ == "__main__":
 	print('X_est:')
 	print(np.einsum('abc,cde,e->bd', np.reshape(wopt[0],[r0,n1,r1]), np.reshape(wopt[1],[r1,n2,r2]), wopt[2]))
 	print('X_gt:')
-	print(tf.Session().run(t3f.full(X_gt)))
+	print(X_gt)
