@@ -24,7 +24,8 @@ if __name__ == "__main__":
 
 
 	# Generate random data
-	X_gt = t3f.random_tensor(Ns, tt_rank=tt_ranks, mean=0., stddev=1.)
+	X_gt = np.random.randn(n1,n2,n3,n4).astype('float32')
+	X_gt = t3f.to_tt_tensor(X_gt, max_tt_rank=r)
 
 	Q1 = tf.Variable(tf.zeros([r0*n1,r1]))
 	Q2 = tf.Variable(tf.zeros([r1*n2,r2]))
