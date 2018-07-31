@@ -9,31 +9,32 @@ from pymanopt.manifolds import Euclidean, Stiefel, Product
 if __name__ == "__main__":
 
 	# This is just a 5x3 matrix with full rank
-	r = 3
-	r0 = 1
-	r1 = r
-	r2 = 1
-	tt_ranks = [r0,r1,r2]
+	r = [1,3,1]
 	n1 = 5
 	n2 = 3
-	Ns = [n1,n2]
-	d = len(Ns)
+	n = [0,n1,n2]
+	d = len(n)-1
 
+	np.random.seed(0)
 
 	# Generate random data
 	X_gt = np.random.randn(n1,n2).astype('float32')
-	X_gt3f = t3f.to_tt_tensor(X_gt, max_tt_rank=r)
+	X_gt3f = t3f.to_tt_tensor(X_gt, max_tt_rank=3)
 
-	Q1 = tf.Variable(tf.zeros([r0*n1,r1])) # 5 X 3
-	Q2 = tf.Variable(tf.zeros([r1*n2,r2])) # 9 X 1
-	R2 = tf.Variable(tf.zeros([r2])) # 1 X 1
+	# Set up orthogonal matrices
+	Q = []
+	for i in range(0,d):
+		Q.append( tf.Variable( tf.zeros([r[i]*n[i+1],r[i+1]]) ) )
+	Q.append( tf.Variable(tf.zeros(r[d])) ) # R
 
-	U1 = tf.reshape(Q1,[r0,n1,r1]) # 1 X 5 X 3
-	U2 = tf.reshape(Q2,[r1,n2,r2]) # 3 X 3 X 1
-	U2 = tf.multiply(U2,R2) # 3 X 3 X 1
+	# reshape for cost evaluation
+	U = []
+	for i in range(0,d):
+		U.append( tf.reshape(Q[i],[r[i],n[i+1],r[i+1]]) )
+	U[d-1] = tf.einsum('abc,c->abc',U[d-1],Q[d])
 
 	# Cost function is the sqaured test error
-	X_hat = tf.einsum('abc,cde->bd',U1,U2) # 5 X 3
+	X_hat = tf.einsum('abc,cde->bd',*U) # 5 X 3
 
 	cost = tf.reduce_mean(tf.square(X_hat - t3f.full(X_gt3f))) # scalar
 
@@ -42,14 +43,24 @@ if __name__ == "__main__":
 	solver = SteepestDescent()
 
 	# Product Manifold
-	manifold = Product(( Stiefel(r0*n1, r1), Stiefel(r1*n2, r2), Euclidean(r2) ))
+	PM = ()
+	for i in range(0,d):
+		PM = PM + (Stiefel(r[i]*n[i+1], r[i+1]),)
+	PM = PM + (Euclidean(r[d]),)
+	manifold = Product( PM )
 	#manifold = Product(( Euclidean(r0*n1, r1), Euclidean(r1*n2, r2), Euclidean(r2) ))
 
 	# Solve the problem with pymanopt
-	problem = Problem(manifold=manifold, cost=cost, arg=[Q1,Q2,R2], verbosity=2)
+	problem = Problem(manifold=manifold, cost=cost, arg=Q, verbosity=2)
 	wopt = solver.solve(problem)
-
+	
+	Uest = []
+	for i in range(0,d):
+		Uest.append( np.reshape(wopt[i],[r[i],n[i+1],r[i+1]]) )
+	Uest.append(wopt[d])
+	print(Uest)
+	print(len(Uest))
 	print('X_est:')
-	print(np.einsum('abc,cde,e->bd', np.reshape(wopt[0],[r0,n1,r1]), np.reshape(wopt[1],[r1,n2,r2]), wopt[2]))
+	print( np.einsum('abc,cde,e->bd', *Uest) )
 	print('X_gt:')
-	print(X_gt)
+	print(tf.Session().run(t3f.full(X_gt3f)))
