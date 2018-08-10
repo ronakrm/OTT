@@ -21,9 +21,9 @@ class aOTTtfVariable():
 		for i in range(0, self.d):
 			for j in range(0, self.n[i]):
 				if self.r[i+1] > self.r[i]:
-					self.Q.append( tf.Variable( tf.zeros([self.r[i+1], self.r[i]]) ) )
+					self.Q.append( tf.Variable( tf.random_uniform([self.r[i+1], self.r[i]]) ) )
 				else:
-					self.Q.append( tf.Variable( tf.zeros([self.r[i], self.r[i+1]]) ) )
+					self.Q.append( tf.Variable( tf.random_uniform([self.r[i], self.r[i+1]]) ) )
 
 	def setupU(self):
 		self.U = []

@@ -20,8 +20,8 @@ class OTTtfVariable():
 	def setupQ(self):
 		self.Q = []
 		for i in range(0, self.d):
-			self.Q.append( tf.Variable( tf.zeros([self.r[i]*self.n[i+1], self.r[i+1]]) ) )
-		self.Q.append( tf.Variable(tf.zeros(self.r[self.d])) ) # R
+			self.Q.append( tf.Variable( tf.random_uniform([self.r[i]*self.n[i+1], self.r[i+1]]) ) )
+		self.Q.append( tf.Variable(tf.random_uniform([self.r[self.d],])) ) # R
 
 	def setupU(self):
 		self.U = []
