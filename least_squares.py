@@ -2,10 +2,12 @@ import tensorflow as tf
 import numpy as np
 
 from OTTtfVariable import OTTtfVariable
+from aOTTtfVariable import aOTTtfVariable
+import utils as ut
 
 from pymanopt import Problem
 from pymanopt.solvers import SteepestDescent, TrustRegions
-from pymanopt.manifolds import Euclidean, Stiefel, Product
+from pymanopt.manifolds import Product
 
 if __name__ == "__main__":
 
@@ -27,7 +29,7 @@ if __name__ == "__main__":
 	W_gt = np.random.randn(dx,dy).astype('float32')
 	Y = X.dot(W_gt) #+ 0.01*np.random.randn(N,dy)
 
-	W_hat = OTTtfVariable(opt_n=n, out_n=[dx,dy], r=r)
+	W_hat = aOTTtfVariable(opt_n=n, out_dims=[dx,dy], r=r)
 
 	# Cost function is the sqaured test error
 	Y_hat =	tf.matmul(X,W_hat.getW())
@@ -38,22 +40,20 @@ if __name__ == "__main__":
 	solver = SteepestDescent()
 
 	# Product Manifold
-	PM = ()
-	for i in range(0,d):
-		PM = PM + (Stiefel(r[i]*n[i], r[i+1]),)
-	PM = PM + (Euclidean(r[d]),)
-	manifold = Product( PM )
+	manifold = Product( W_hat.getManifoldList() )
 
 	# Solve the problem with pymanopt
 	problem = Problem(manifold=manifold, cost=cost, arg=W_hat.getQ(), verbosity=2)
 	wopt = solver.solve(problem)
 
-	Uest = []
-	for i in range(0,d):
-		Uest.append( np.reshape(wopt[i],[r[i],n[i],r[i+1]]) )
-	Uest.append(wopt[d])
-	print('W_est:')
-	W_est = np.reshape( np.einsum('abc,cde,efg,ghi,ijk,klm,m->bdfhjl', *Uest), [dx,dy] )
+	W_est = ut.aOTTreconst(wopt, d, n, r, [dx,dy])
+
+	# Uest = []
+	# for i in range(0,d):
+	# 	Uest.append( np.reshape(wopt[i],[r[i],n[i],r[i+1]]) )
+	# Uest.append(wopt[d])
+	# print('W_est:')
+	# W_est = np.reshape( np.einsum('abc,cde,efg,ghi,ijk,klm,m->bdfhjl', *Uest), [dx,dy] )
 	print( W_est )
 	print('W_gt:')
 	print(W_gt)
