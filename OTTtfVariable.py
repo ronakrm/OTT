@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 from pymanopt import Problem
@@ -6,10 +7,12 @@ from pymanopt.manifolds import Euclidean, Stiefel
 
 class OTTtfVariable():
 
-	def __init__(self, opt_n, out_dims, r):
-		self.out_dims = out_dims
-		self.d = len(opt_n) # number of modes of tensor rep
-		self.n = [0] + opt_n # dim of modes in tensor rep
+	def __init__(self, shape, r):
+		self.ns = np.array(shape)
+		self.in_dim = np.prod(self.ns[0])
+		self.out_dim = np.prod(self.ns[1])
+		self.n = np.multiply(self.ns[0], self.ns[1])
+		self.d = len(self.n) # number of modes of tensor rep
 		self.r = r
 		self.setupQ()
 		self.setupU()
@@ -20,25 +23,34 @@ class OTTtfVariable():
 	def setupQ(self):
 		self.Q = []
 		for i in range(0, self.d):
-			self.Q.append( tf.Variable( tf.random_uniform([self.r[i]*self.n[i+1], self.r[i+1]]) ) )
+			if self.r[i+1] > self.r[i]*self.n[i]:
+				self.Q.append( tf.Variable( tf.random_uniform([self.r[i+1], self.r[i]*self.n[i]]) ) )
+			else:
+				self.Q.append( tf.Variable( tf.random_uniform([self.r[i]*self.n[i], self.r[i+1]]) ) )
 		self.Q.append( tf.Variable(tf.random_uniform([self.r[self.d],])) ) # R
 
 	def setupU(self):
 		self.U = []
 		for i in range(0, self.d):
-			self.U.append( tf.reshape(self.Q[i], [self.r[i], self.n[i+1], self.r[i+1]]) )
+			if self.r[i+1] > self.r[i]*self.n[i]:
+				self.U.append( tf.transpose(tf.reshape(self.Q[i], [self.r[i+1], self.n[i], self.r[i] ])) )
+			else:
+				self.U.append( tf.reshape(self.Q[i], [self.r[i], self.n[i], self.r[i+1]]) )
 		self.U[self.d-1] = tf.einsum('abc,c->abc', self.U[self.d-1], self.Q[self.d])
 
 	def setupW(self):
 		self.W = self.U[0] # first
 		for i in range(1, self.d): # second through last
 			self.W = tf.tensordot(self.W, self.U[i], axes=1)
-		self.W = tf.reshape(self.W, self.out_dims)
+		self.W = tf.reshape(self.W, [self.in_dim, self.out_dim])
 
 	def setupManifold(self):
 		PM = ()
 		for i in range(0, self.d):
-			PM = PM + (Stiefel(self.r[i]*self.n[i+1], self.r[i+1]),)
+			if self.r[i+1] > self.r[i]*self.n[i]:
+				PM = PM + (Stiefel(self.r[i+1], self.r[i]*self.n[i]),)
+			else:
+				PM = PM + (Stiefel(self.r[i]*self.n[i], self.r[i+1]),)
 		PM = PM + (Euclidean(self.r[self.d]),)
 		self.manifoldList = PM
 
