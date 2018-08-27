@@ -18,7 +18,7 @@ myTTrank = 100
 r = [1, myTTrank, myTTrank, myTTrank, 1]
 nx = [4, 7, 4, 7]
 nh = [5, 5, 5, 5]
-
+tf.set_random_seed(0)
 
 ########## Dataset ##########
 
@@ -38,13 +38,13 @@ b1 = tf.get_variable('b1', shape=[625])
 
 # initialize the weight matrix rep'd as TT using t3f. equivalent to:
 # W1 = tf.get_variable('W1', shape=[784,625]) 
-initializer = t3f.glorot_initializer([nx, nh], tt_rank=myTTrank)
-W1 = t3f.get_variable('W1', initializer=initializer) 
-f1 = t3f.matmul(X, W1) + b1
+#initializer = t3f.glorot_initializer([nx, nh], tt_rank=r)
+#initializer = t3f.matrix_ones([nx, nh])
+#W1 = t3f.get_variable('W1', initializer=initializer) 
+#f1 = t3f.matmul(X, W1) + b1
 
-#W1 = TTtfVariable(shape=[nh,nx], r=r, name='W1')
-#f1 = tf.matmul(W1.getW(), X) + b1
-#f1 = W1.mult(X) + b1
+W1 = TTtfVariable(shape=[nh,nx], r=r, name='W1')
+f1 = tf.transpose(W1.mult(tf.transpose(X))) + b1
 
 # do a ReLU approximation, equivalent to:
 h1 = tf.nn.relu(f1)
