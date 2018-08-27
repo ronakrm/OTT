@@ -6,13 +6,15 @@ from pymanopt.manifolds import Stiefel
 
 class aOTTtfVariable():
 
-	def __init__(self, shape, r):
+	def __init__(self, shape, r, name='aOTT_Var_default'):
 		self.ns = np.array(shape)
 		self.in_dim = np.prod(self.ns[0])
 		self.out_dim = np.prod(self.ns[1])
 		self.n = np.multiply(self.ns[0], self.ns[1])
 		self.d = len(self.n) # number of modes of tensor rep
 		self.r = r
+		self._name = name
+
 		self.setupQ()
 		self.setupU()
 		self.setupW()
@@ -20,13 +22,19 @@ class aOTTtfVariable():
 		self.setupManifold()
 
 	def setupQ(self):
+		#orth_init = tf.orthogonal_initializer()
+		orth_init = tf.glorot_uniform_initializer()
 		self.Q = []
 		for i in range(0, self.d):
 			for j in range(0, self.n[i]):
+				vname = self._name+str(i)+str(j)
 				if self.r[i+1] > self.r[i]:
-					self.Q.append( tf.Variable( tf.random_uniform([self.r[i+1], self.r[i]]) ) )
+					tmp = tf.get_variable(vname, \
+						shape=[self.r[i+1], self.r[i]], initializer=orth_init )
 				else:
-					self.Q.append( tf.Variable( tf.random_uniform([self.r[i], self.r[i+1]]) ) )
+					tmp = tf.get_variable(vname, \
+						shape=[self.r[i], self.r[i+1]], initializer=orth_init )
+				self.Q.append( tmp )
 
 	def setupU(self):
 		self.U = []
@@ -56,10 +64,6 @@ class aOTTtfVariable():
 	 			else:
 	 				PM = PM + (Stiefel(self.r[i], self.r[i+1]),)
 		self.manifoldList = PM
-
-	# def getProblem(self, cost):
-	# 	problem = Problem(manifold=self.manifold, cost=cost, arg=self.getQ(), verbosity=2)
-	# 	return problem
 
 	def getQ(self):
 		return self.Q
