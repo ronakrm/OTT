@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 
-import t3f
 from aOTTtfVariable import aOTTtfVariable
 from stiefel_ops import proj, retract
 
@@ -14,7 +13,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 niters = 1000
 batch_size = 32
-lr = 0.01
+lr = 1e-4
 myTTrank = 100
 r = [1, myTTrank, myTTrank, myTTrank, 1]
 nx = [4, 7, 4, 7]
@@ -30,32 +29,28 @@ trainLbs = mnist.train.labels
 
 ########## Variables ##########
 
-X = tf.placeholder(tf.float32, [None, 784])
-Y = tf.placeholder(tf.float32, [None, 10])
+X = tf.placeholder(tf.float32, [batch_size, 784])
+Y = tf.placeholder(tf.float32, [batch_size, 10])
 
 ########## First Layer ##########
 
+W1 = aOTTtfVariable(shape=[nh,nx], r=r, name='W1')
 b1 = tf.get_variable('b1', shape=[625])
 
-# initialize the weight matrix rep'd as TT using t3f. equivalent to:
-# W1 = tf.get_variable('W1', shape=[784,625]) 
-#initializer = t3f.glorot_initializer([nx, nh], tt_rank=r)
-#initializer = t3f.matrix_ones([nx, nh])
-#W1 = t3f.get_variable('W1', initializer=initializer) 
-#f1 = t3f.matmul(X, W1) + b1
+Xnorm =  tf.nn.l2_normalize(X, dim=1)
+o = tf.nn.l2_normalize( W1.mult(tf.transpose(Xnorm)), dim=0 )
 
-W1 = aOTTtfVariable(shape=[nh,nx], r=r, name='W1')
-f1 = tf.transpose(W1.mult(tf.transpose(X))) + b1
+#o = W1.mult(tf.transpose(Xnorm))
 
-# do a ReLU approximation, equivalent to:
+f1 = tf.transpose(o) + b1
 h1 = tf.nn.relu(f1)
-#z1 = tf.distributions.Bernoulli(logits=10*f1,dtype=tf.float32).sample()
-#h1 = tf.multiply(f1,z1)
+
 
 ########## Second Layer ##########
 
 W2 = tf.get_variable('W2', shape=[625, 10])
 b2 = tf.get_variable('b2', shape=[10])
+
 h2 = tf.matmul(h1, W2) + b2
 
 
@@ -66,11 +61,13 @@ loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=h
 opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
 
 EucgradsNvars = opt.compute_gradients(loss, [b1, W2, b2])
-Eucupdate = opt.apply_gradients(EucgradsNvars)
+myEucgrads = [(-1*lr*g, v) for g, v in EucgradsNvars]
+Eucupdate = opt.apply_gradients(myEucgrads)
 
 aOTTgradsNvars = opt.compute_gradients(loss, W1.getQ())
-projd = [proj(aOTTgradsNvars[k][1], aOTTgradsNvars[k][0]) for k in range(len(aOTTgradsNvars))]
-retrd = [retract(aOTTgradsNvars[k][1], projd[k]) for k in range(len(aOTTgradsNvars))]
+projd = [proj(var, grad) for grad, var in aOTTgradsNvars]
+#projd = [proj(aOTTgradsNvars[k][1], aOTTgradsNvars[k][0]) for k in range(len(aOTTgradsNvars))]
+retrd = [retract(aOTTgradsNvars[k][1], -1*lr*projd[k]) for k in range(len(aOTTgradsNvars))]
 
 Steifupdate = [aOTTgradsNvars[k][1].assign(retrd[k]) for k in range(len(aOTTgradsNvars))]
 
@@ -85,7 +82,8 @@ for it in range(niters):
 
     #_, itloss = sess.run([solver, loss], feed_dict={X: X_mb, Y: y_mb})
     _, _, itloss = sess.run([Eucupdate, Steifupdate, loss], feed_dict={X: X_mb, Y: y_mb})
-    if it % 100 == 0:
+    #$if it % 100 == 0:
+    if 1==1:
         pred = sess.run(tf.argmax(tf.nn.sigmoid(h2), axis=1), feed_dict={X: X_mb})
         acc = np.argmax(y_mb, axis=1)
         batch_acc = sum(np.equal(pred,acc))/float(batch_size)

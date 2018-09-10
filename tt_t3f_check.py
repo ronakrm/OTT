@@ -5,7 +5,7 @@ from TTtfVariable import TTtfVariable
 
 ny = [1,4,3]
 nx = [7,5,1]
-r = [1,1,1,1]
+r = [1,4,4,1]
 #np.random_seed(0)
 tf.set_random_seed(0)
 B = np.random.uniform(size=[np.prod(nx),3]).astype('float32')
@@ -19,9 +19,6 @@ tf.set_random_seed(0)
 initializer = t3f.glorot_initializer([ny, nx], tt_rank=max(r))
 AA = t3f.get_variable('AA', initializer=initializer) 
 #AA = t3f.matrix_ones([ny,nx])
-tf.set_random_seed(0)
-tf.set_random_seed(0)
-
 tf.set_random_seed(0)
 
 sess.run(tf.global_variables_initializer())

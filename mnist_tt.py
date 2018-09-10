@@ -64,6 +64,13 @@ loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=h
 
 solver = tf.train.GradientDescentOptimizer(learning_rate=lr).minimize(loss)
 
+opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+
+gradsNvars = opt.compute_gradients(loss, tf.trainable_variables())
+
+update = opt.apply_gradients(gradsNvars)
+
+
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
@@ -73,7 +80,8 @@ print('Total number of parameters: ', nparams)
 for it in range(niters):
     X_mb, y_mb = mnist.train.next_batch(batch_size)
 
-    _, itloss = sess.run([solver, loss], feed_dict={X: X_mb, Y: y_mb})
+    #_, itloss = sess.run([solver, loss], feed_dict={X: X_mb, Y: y_mb})
+    _, itloss = sess.run([update, loss], feed_dict={X: X_mb, Y: y_mb})
     if it % 100 == 0:
         pred = sess.run(tf.argmax(tf.nn.sigmoid(h2), axis=1), feed_dict={X: X_mb})
         acc = np.argmax(y_mb, axis=1)
