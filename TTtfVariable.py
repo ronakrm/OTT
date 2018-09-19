@@ -4,15 +4,11 @@ import tensorflow as tf
 class TTtfVariable():
 
     def __init__(self, shape, r, name='TT_Var_default'):
-
-        #self.varScope = tf.get_variable_scope()
-
         self.ns = np.array(shape)
         self.n_out = self.ns[0]
         self.n_in = self.ns[1]
         self.in_dim = np.prod(self.n_in)
         self.out_dim = np.prod(self.n_out)
-        #self.n = np.multiply(self.ns[0], self.ns[1])
         self.d = len(self.n_in) # number of modes of tensor rep
         self.r = np.array(r)
         self._name = name
@@ -43,7 +39,6 @@ class TTtfVariable():
         data  = tf.transpose(arg)
         data = tf.reshape(data, (-1, self.n_in[-1], 1))
         for i in reversed(range(self.d)):
-            #cur = tf.get_variable(self.Q[i])
             cur = self.Q[i]
             data = tf.einsum('aijb,rjb->ira', cur, data)
             if i > 0:
