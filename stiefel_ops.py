@@ -1,6 +1,13 @@
 import numpy as np
 import tensorflow as tf
 
+def gradStep(X, G, lr):
+    projd = proj(X, G)
+    # retrd = retract(X, lr*projd)
+    retrd = retract(X, -1*lr*projd)
+    return retrd
+
+
 def proj(X, U):
     # project U to Stiefel tangent space at X
     return U - multiprod(X, multisym(multiprod(multitransp(X), U)))

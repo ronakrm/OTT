@@ -34,7 +34,7 @@ class aOTTtfVariable():
         for i in range(0, self.d):
             for j in range(0, self.n_out[i]):
                 for k in range(0, self.n_in[i]):
-                    vname = self._name+str(i)+str(j)+str(k)
+                    vname = self._name+str(i).zfill(4)+str(j).zfill(4)+str(k).zfill(4)
                     if self.r[i+1] > self.r[i]:
                        myshape = [self.r[i+1], self.r[i]]
                     else:
@@ -81,6 +81,8 @@ class aOTTtfVariable():
 
     def getQ(self):
         return self.Q
+    def getU(self):
+        return self.U
     
     def getW(self):
         return self.W

@@ -28,7 +28,7 @@ class TTtfVariable():
         init = tf.random_normal_initializer(mean=0., stddev=core_stddev, seed=0)
         #init = tf.ones_initializer()
         for i in range(0, self.d):
-            vname = self._name+str(i)
+            vname = self._name+str(i).zfill(4)
             myshape = [self.r[i], self.n_out[i], self.n_in[i], self.r[i+1]]
             tmp = tf.get_variable(name=vname, shape=myshape, initializer=init)
             Q.append(tmp)
@@ -48,7 +48,7 @@ class TTtfVariable():
 
     def getQ(self):
         return self.Q
-
+ 
     def projQ(self):
         UU = []
         for i in range(0, self.d):
@@ -68,6 +68,3 @@ class TTtfVariable():
             tmpA = tf.stack(tmpA, axis=2)
             UU.append(tmpA)
         return UU
-
-
-                  
