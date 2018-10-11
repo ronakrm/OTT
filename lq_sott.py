@@ -5,6 +5,7 @@ import time
 
 from OTTtfVariable import OTTtfVariable
 from aOTTtfVariable import aOTTtfVariable
+from sOTTtfVariable import sOTTtfVariable
 import utils as ut
 from stiefel_ops import proj, retract, gradStep
 
@@ -28,19 +29,15 @@ if __name__ == "__main__":
     # #r = [1, max(n), max(n), max(n), 1]
     # r = [1,100,100,100,1]
 
-    lr = 1e-2
+    lr = 1e-3
     dx = 256
     dy = 256
     nx = [4,4,4,4]
     ny = [4,4,4,4]
     n = map(lambda x,y:x*y, nx, ny)
-    #r = [1, max(n), max(n), max(n), 1]
-    r = [1,2,2,2,1]
-    
+    r = 2
 
     np.random.seed(13245)
-
-    #rank_normalizer = np.sqrt(4)*35+np.sqrt(3)*20
 
     X_data = np.random.uniform(size=[N,dx]).astype('float32')
     W_gt = (2*np.random.uniform(size=[dx,dy]).astype('float32')-1)
@@ -50,25 +47,17 @@ if __name__ == "__main__":
     X = tf.placeholder(tf.float32, [batch_size, dx])
     Y = tf.placeholder(tf.float32, [batch_size, dy])
 
-    W_hat = aOTTtfVariable(shape=[ny,nx], r=r)
+    W_hat = sOTTtfVariable(shape=[ny,nx], r=r)
 
-    scale = tf.get_variable('scale', shape=[1], initializer=tf.ones_initializer())
-    Y_hat = tf.abs(scale)*tf.transpose(W_hat.mult(tf.transpose(X)))
-    # Y_hat = tf.transpose(W_hat.mult(tf.transpose(X)))
-    # Y_hat = 13*tf.transpose(W_hat.mult(tf.transpose(X)))
+    Y_hat = tf.transpose(W_hat.mult(tf.transpose(X)))
+
     loss = tf.reduce_mean(tf.square(Y - Y_hat))
-    #loss = tf.reduce_mean(tf.square(c*W_hat.getW() - tf.transpose(W_gt)))
-    opt = tf.train.GradientDescentOptimizer(learning_rate=lr) # this lr is ignored
 
-    # Stiefel OTT Update
-    aOTTgradsNvars = opt.compute_gradients(loss, W_hat.getQ())
-    Steifupdate = [v.assign(gradStep(v, g, lr)) for g, v in aOTTgradsNvars]
-
-    # Euclidean Update
-    EucgradsNvars = opt.compute_gradients(loss, [scale])
+    opt = tf.train.GradientDescentOptimizer(learning_rate=lr)#.minimize(loss)
+    EucgradsNvars = opt.compute_gradients(loss, W_hat.getV())
     myEucgrads = [(g, v) for g, v in EucgradsNvars]
     Eucupdate = opt.apply_gradients(myEucgrads)
-    
+
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
 
@@ -76,32 +65,13 @@ if __name__ == "__main__":
     print('Total number of parameters: ', nparams)
 
     for i in range(0,niters):
-        x_mb, y_mb = ut.next_batch(X_data, Y_data, batch_size)        
-
-        _, itloss = sess.run([Steifupdate, loss], feed_dict={X: x_mb, Y: y_mb})
+        x_mb, y_mb = ut.next_batch(X_data, Y_data, batch_size)
         _, itloss = sess.run([Eucupdate, loss], feed_dict={X: x_mb, Y: y_mb})
 
-        #for j in range(0,100):
-#            _, itloss = sess.run([Steifupdate, loss], feed_dict={X: x_mb, Y: y_mb})
-        #for j in range(0,100):
-        #_, itloss = sess.run([Eucupdate, loss], feed_dict={X: x_mb, Y: y_mb})
-
-        # print(i,itloss)
-        print(i,itloss,'\tscale\t',sess.run(scale))
+        print(i,itloss)
     t1 = time.time()
     print('Took seconds:', t1 - t0)
 
-    # sess.run([Steifupdate], feed_dict={X: x_mb, Y: y_mb})
-
-    # vv = 0
-    # for i in range(0,len(W_hat.getQ())):
-    #     a = np.linalg.norm(sess.run(W_hat.getQ()[i]))
-    #     if a > 1.1:
-    #         print(W_hat.getQ()[i].name, a)
-    #         print(W_hat.getQ()[i].shape)
-    #         vv = vv + 1
-    #     else:
-    #         print('other shape: ', W_hat.getQ()[i].shape)
     print(np.linalg.norm(sess.run(scale*W_hat.getW()),'fro'))
     print(np.linalg.norm(W_gt,'fro'))
     print(sess.run(scale*W_hat.getW()))

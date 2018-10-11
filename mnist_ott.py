@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import time
+np.set_printoptions(precision=4)
 
 from aOTTtfVariable import aOTTtfVariable
+from sOTTtfVariable import sOTTtfVariable
 from stiefel_ops import gradStep
 from utils import next_batch
 
@@ -15,7 +17,8 @@ from tensorflow.examples.tutorials.mnist import input_data
 def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
     ########## Parameters ##########
 
-    r = [1, myTTrank, myTTrank, myTTrank, 1]
+    # r = [1, myTTrank, myTTrank, myTTrank, 1]
+    r = myTTrank
     nx = [4, 7, 4, 7]
     nh = [5, 5, 5, 5]
     nz = [1,2,5,1]
@@ -27,7 +30,7 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
 
     ########## First Layer ##########
 
-    W1 = aOTTtfVariable(shape=[nh,nx], r=r, name='W1')
+    W1 = sOTTtfVariable(shape=[nh,nx], r=r, name='W1')
     b1 = tf.get_variable('b1', shape=[625])
 
     c = tf.get_variable('c', shape=[1])
@@ -56,14 +59,15 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
 
     ########## Optimizer and Gradient Updates ##########
 
-    opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+    # opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+    opt = tf.train.GradientDescentOptimizer(learning_rate=lr).minimize(loss)
 
-    EucGnVs = opt.compute_gradients(loss, [c, b1, W2, b2])
-    myEucgrads = [(g, v) for g, v in EucGnVs]
-    Eucupdate = opt.apply_gradients(myEucgrads)
+    # EucGnVs = opt.compute_gradients(loss, [c, b1, W2, b2])
+    # myEucgrads = [(g, v) for g, v in EucGnVs]
+    # Eucupdate = opt.apply_gradients(myEucgrads)
 
-    AottGnVs = opt.compute_gradients(loss, W1.getQ())
-    Steifupdate = [v.assign(gradStep(v, g, lr)) for g, v in AottGnVs]
+    # AottGnVs = opt.compute_gradients(loss, W1.getQ())
+    # Steifupdate = [v.assign(gradStep(X=v, G=g)) for g, v in AottGnVs]
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
@@ -78,8 +82,9 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
     for it in range(niters):        
         X_mb, y_mb = next_batch(x=trainX, y=trainY, batch_size=batch_size)
 
-        _, itloss = sess.run([Steifupdate, loss], feed_dict={X: X_mb, Y: y_mb})
-        _, itloss, b_acc = sess.run([Eucupdate, loss, acc], feed_dict={X: X_mb, Y: y_mb})
+        # _, itloss = sess.run([Steifupdate, loss], feed_dict={X: X_mb, Y: y_mb})
+        # _, itloss, b_acc = sess.run([Eucupdate, loss, acc], feed_dict={X: X_mb, Y: y_mb})
+        _, itloss, b_acc = sess.run([opt, loss, acc], feed_dict={X: X_mb, Y: y_mb})
         losses.append(itloss)
         batch_acc.append(b_acc)
         
@@ -87,7 +92,7 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
         #test_acc.append(t_acc)
         
         #if it % 100 == 0:
-        print('Iter',it,'Loss',itloss, 'batch acc', b_acc)
+        print('Iter',it,'Loss',itloss, '\tbatch acc', b_acc)
             #print('Iter',it,'Loss',itloss, 'batch acc', b_acc, 'test acc', t_acc)
 
     t1 = time.time()
@@ -100,8 +105,12 @@ if __name__ == "__main__":
 
     niters = 1000
     batch_size = 32
-    lr = 1e-2
-    myTTranks = [1,5,10,20,50]
+    lr = 1e-4
+    # myTTranks = [1,2,5,10,20,50]
+    r = 5
+    # myTTranks = 6*[r]
+    myTTranks = 100*[r]
+
     tf.set_random_seed(0)
 
     ########## Dataset ##########
@@ -112,19 +121,34 @@ if __name__ == "__main__":
     losses = []
     batchaccs = []
     for myTTrank in myTTranks:
+        trainX = mnist.train.images
+        trainY = mnist.train.labels
         tf.reset_default_graph()
         mytime, loss, batch_acc, test_acc, _ = ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY)
         losses.append(loss)
-        batchaccs.append(batch_acc)
+        batchaccs.append(batch_acc[niters-1])
 
     ## plot data
-    fig = plt.figure()
-    fig.show()
-    ax = fig.add_subplot(111)
-    ax.plot(np.arange(1,niters+1,1), batchaccs[0], 'k-', label='rank=1')
-    ax.plot(np.arange(1,niters+1,1), batchaccs[1], 'm-', label='rank=5')
-    ax.plot(np.arange(1,niters+1,1), batchaccs[2], 'b-', label='rank=10')
-    ax.plot(np.arange(1,niters+1,1), batchaccs[3], 'k:', label='rank=20')
-    ax.plot(np.arange(1,niters+1,1), batchaccs[4], 'r-', label='rank=50')
-    plt.legend()
+    # fig = plt.figure()
+    # fig.show()
+    # ax = fig.add_subplot(111)
+    # ax.plot(np.arange(1,niters+1,1), batchaccs[0], 'k-', label='rank=1')
+    # ax.plot(np.arange(1,niters+1,1), batchaccs[1], 'm-', label='rank=2')
+    # ax.plot(np.arange(1,niters+1,1), batchaccs[2], 'g-', label='rank=5')
+    # ax.plot(np.arange(1,niters+1,1), batchaccs[3], 'b-', label='rank=10')
+    # ax.plot(np.arange(1,niters+1,1), batchaccs[4], 'c-', label='rank=20')
+    # ax.plot(np.arange(1,niters+1,1), batchaccs[5], 'k:', label='rank=50')
+    # plt.legend()
+    # plt.show()
+
+    print(batchaccs)
+    n, bins, patches = plt.hist(batchaccs, 50, facecolor='green', alpha=0.75)
+    plt.xlabel('Batch Accuracy')
+    plt.ylabel('Count')
+    # plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$'))
+    # plt.axis([40, 160, 0, 0.03])
+    plt.grid(True)
+
     plt.show()
+
+    

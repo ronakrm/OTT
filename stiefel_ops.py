@@ -1,10 +1,19 @@
 import numpy as np
 import tensorflow as tf
 
-def gradStep(X, G, lr):
-    projd = proj(X, G)
-    # retrd = retract(X, lr*projd)
-    retrd = retract(X, -1*lr*projd)
+def gradStep(X, G, lr=1):
+    # If updating using gradients from tf.compute_gradients,
+    # lr is already incorporated into grad
+    # ex = tf.cond(tf.reduce_any(tf.is_nan(X)),true_fn=print('X nan'))
+    # ex()
+    # eg = tf.cond(tf.reduce_any(tf.is_nan(G)),true_fn=print('G nan'))
+    # eg()
+    projd = proj(X, -1*lr*G)
+    # ep = tf.cond(tf.reduce_any(tf.is_nan(projd)),true_fn=print('projd nan'))
+    # ep()
+    retrd = retract(X, projd)
+    # er = tf.cond(tf.reduce_any(tf.is_nan(retrd)),true_fn=print('retrd nan'))
+    # er()
     return retrd
 
 
@@ -31,6 +40,15 @@ def retract(X, G):
     #        XNew[i,:,:] = tf.dot(q, tf.diag(tf.sign(tf.sign(tf.diag(r))+.5)))
     return XNew
 
+# def aprx_retract(X, G):
+
+#     # nrows = X.get_shape().as_list()[0]
+#     nrows = 8
+#     A = tf.eye(nrows)-G
+#     B = tf.matrix_inverse(tf.eye(nrows)+G)
+#     caymap = tf.matmul(A , B)
+#     XNew = tf.matmul(caymap , X);
+#     return XNew
 
 #### Following taken from pymanopt  #######
 

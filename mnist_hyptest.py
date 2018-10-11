@@ -6,6 +6,7 @@ import os
 import time
 
 from mnist_ott import ottMNIST
+from vae_ott import ottVAEMNIST
 
 from aOTTtfVariable import aOTTtfVariable
 from stiefel_ops import proj, retract
@@ -28,7 +29,7 @@ def Strain(trainX, trainY):
     myTTrank = 10
     tf.set_random_seed(0)
 
-    _, _, _, _, ottvars = ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY)
+    _, _, _, _, ottvars = ottVAEMNIST(niters, batch_size, lr, myTTrank, trainX, trainY)
 
     return ottvars
 
