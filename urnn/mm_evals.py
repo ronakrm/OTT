@@ -34,11 +34,17 @@ class Main:
     def init_data(self):
         print('Generating data...')
 
-        self.mm_batch_size = 3
-        self.mm_epochs = 5
+        self.mm_batch_size = 3 #10, 32
+        self.mm_epochs = 5 #10, 50, 100
+
+        ## THIS NEEDS TO ALSO BE UPDATED IN TF_RNN and OTTRNN_CELL
+        ## SHOULD UPDATE TT DECOMP MODES TO MATCH 
+        self.hidden_size = 4096 # 64, 256, 1024, 4096
+        frame_size = 256   #1024   # default 64
+
+        self.vec_size = frame_size**2
 
         digit_size = 56   #224    # default 28
-        frame_size = 256   #1024   # default 64
         self.mm_data= MovingMnistProblemDataset(200, 3, num_sz=digit_size, frame_size=frame_size)
 
         print('Done.')
@@ -81,10 +87,10 @@ class Main:
         tf.reset_default_graph()
         self.mm_ottrnn=TFRNN(
             name="mm_ottrnn",
-            num_in=1048576,
-            num_hidden=4096,
-            num_out=1048576,
-            num_target=1048576,
+            num_in=self.vec_size,
+            num_hidden=self.hidden_size,
+            num_out=self.vec_size,
+            num_target=self.vec_size,
             single_output=False,
             rnn_cell=OTTRNNCell,
             activation_hidden=tf.tanh, # modReLU
@@ -144,7 +150,6 @@ class Main:
         # main.train_urnn_for_timestep_idx(0)
         
         
-
         print('Done and done.')
 
 main=Main()

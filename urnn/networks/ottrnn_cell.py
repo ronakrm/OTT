@@ -6,20 +6,8 @@ sys.path.insert(0, '../')
 from vars.sOTTtfVariable import sOTTtfVariable
 # from vars.aOTTtfVariable import aOTTtfVariable
 # from vars.TTtfVariable import TTtfVariable
-import t3f
+# import t3f
 
-def normalize(z):
-    norm = tf.sqrt(tf.reduce_sum(tf.abs(z)**2))
-    factor = (norm + 1e-6)
-    return tf.complex(tf.real(z) / factor, tf.imag(z) / factor)
-
-# z: complex[batch_sz, num_units]
-# bias: real[num_units]
-def modReLU(z, bias): # relu(|z|+b) * (z / |z|)
-    norm = tf.abs(z)
-    scale = tf.nn.relu(norm + bias) / (norm + 1e-6)
-    scaled = tf.complex(tf.real(z)*scale, tf.imag(z)*scale)
-    return scaled
 
 ###################################################################################################333
 
@@ -88,17 +76,11 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
 
         # prepare input linear combination
         # inputs_mul = tf.matmul(inputs, tf.transpose(self.w_ih)) # [batch_sz, 2*num_units]
-        print(inputs.shape)
         inputs_mul = tf.transpose(self.w_ih.mult(tf.transpose(inputs)))
-        print(inputs_mul.shape)
         # [batch_sz, num_units]
-        
-        print(state.shape)
+
         state_mul = tf.transpose(self.W1.mult(tf.transpose(state)))
-        print(state_mul.shape)
         # state_mul = t3f.matmul(state, self.W1)
-        # mysess = tf.Session()
-        # print(mysess.run(nnn))
         # state_mul = tf.matmul(state, self.W1)
 
         # [batch_sz, num_units]

@@ -33,6 +33,13 @@ class TFRNN:
 
         ###### THIS IS A HARD CODE ILL FIX EVENTUALLY #####
         max_time = 3 # match with mm_evals data length
+        # set up h->o parameters
+        maxTTrank = 16
+        # no = [4,16,16,16,16,4]
+        no = [4, 8, 8, 8, 8, 4]
+        nh = [4, 4, 4, 4, 4,4]
+        # for plotting at the end
+        frame_size = 256
 
         # self
         self.name = name
@@ -83,11 +90,6 @@ class TFRNN:
         elif type(self.cell.state_size) == tf.contrib.rnn.LSTMStateTuple:
             self.dyn_rnn_init_states = tf.contrib.rnn.LSTMStateTuple(self.init_states[0], self.init_states[1])
 
-        # set up h->o parameters
-        maxTTrank = 16
-        # no = [4,16,16,16,16,4]
-        no = [4, 8, 8, 8, 8, 4]
-        nh = [4, 4, 4, 4, 4,4]
         self.w_ho = sOTTtfVariable(name="w_ho_"+self.name, shape=[no,nh], r=maxTTrank)
         # self.w_ho = tf.get_variable("w_ho_"+self.name, shape=[num_out, self.output_size], 
                                             # initializer=tf.contrib.layers.xavier_initializer()) # fixme
@@ -213,11 +215,10 @@ class TFRNN:
             for init_state in self.init_states:
                 feed_dict[init_state] = np.random.uniform(-self.init_state_C, self.init_state_C, [X_val.shape[0], init_state.shape[1]])
             preds = sess.run(self.predictions, feed_dict)
-            self.valplot(X_batch[0,:,:], preds[0,:,:])
+            self.valplot(X_val[0,:,:], preds[0,:,:])
 
     def valplot(self, gt, pred):
 
-        frame_size = 256
         plt.subplot(231)
         print(gt.shape)
         a = np.reshape(gt[0,:], [frame_size, frame_size])
