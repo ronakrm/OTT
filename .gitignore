@@ -1,4 +1,5 @@
 # folders for results, data, and logs
+urnn/losses.txt
 urnn/logs/*
 urnn/results/*
 *.gz

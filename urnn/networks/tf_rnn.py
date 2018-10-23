@@ -29,17 +29,21 @@ class TFRNN:
         activation_hidden,
         activation_out,
         optimizer,
-        loss_function):
+        loss_function,
+        seq_len,
+        ttRank,
+        imTTmodes,
+        hdTTmodes):
 
-        ###### THIS IS A HARD CODE ILL FIX EVENTUALLY #####
-        max_time = 3 # match with mm_evals data length
+        self.seq_len = seq_len
+        
         # set up h->o parameters
-        maxTTrank = 16
-        # no = [4,16,16,16,16,4]
-        no = [4, 8, 8, 8, 8, 4]
-        nh = [4, 4, 4, 4, 4,4]
+        self.ttRank = ttRank
+        self.no = imTTmodes
+        self.nh = hdTTmodes
+
         # for plotting at the end
-        frame_size = 256
+        self.frame_size = int(np.sqrt(num_out))
 
         # self
         self.name = name
@@ -52,7 +56,8 @@ class TFRNN:
         if rnn_cell == URNNCell:
             self.cell = rnn_cell(num_units = num_hidden, num_in = num_in)
         elif rnn_cell == OTTRNNCell:
-            self.cell = rnn_cell(num_units = num_hidden, num_in = num_in)
+            self.cell = rnn_cell(num_units = num_hidden, num_in = num_in,
+                                    nh=hdTTmodes, nx=imTTmodes, ttRank=ttRank)
         else:
             self.cell = rnn_cell(num_units = num_hidden, activation = activation_hidden)
 
@@ -90,7 +95,7 @@ class TFRNN:
         elif type(self.cell.state_size) == tf.contrib.rnn.LSTMStateTuple:
             self.dyn_rnn_init_states = tf.contrib.rnn.LSTMStateTuple(self.init_states[0], self.init_states[1])
 
-        self.w_ho = sOTTtfVariable(name="w_ho_"+self.name, shape=[no,nh], r=maxTTrank)
+        self.w_ho = sOTTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=self.ttRank)
         # self.w_ho = tf.get_variable("w_ho_"+self.name, shape=[num_out, self.output_size], 
                                             # initializer=tf.contrib.layers.xavier_initializer()) # fixme
         self.b_o = tf.Variable(tf.zeros([num_out, 1]), name="b_o_"+self.name)
@@ -113,7 +118,7 @@ class TFRNN:
             # outputs_h: [batch_size, max_time, m_out]
             # out_h_mul = tf.einsum('ijk,kl->ijl', outputs_h, tf.transpose(self.w_ho))
             # preact = out_h_mul + tf.transpose(self.b_o)
-            preact = tf.transpose(self.w_ho.t_mult(tf.transpose(outputs_h), max_time)) + tf.transpose(self.b_o)
+            preact = tf.transpose(self.w_ho.t_mult(tf.transpose(outputs_h), self.seq_len)) + tf.transpose(self.b_o)
             outputs_o = activation_out(preact) # [batch_size, time_step, num_out]
             
         self.predictions = outputs_o
@@ -221,22 +226,22 @@ class TFRNN:
 
         plt.subplot(231)
         print(gt.shape)
-        a = np.reshape(gt[0,:], [frame_size, frame_size])
+        a = np.reshape(gt[0,:], [self.frame_size, self.frame_size])
         plt.imshow(a)
         plt.subplot(232)
-        a = np.reshape(gt[1,:], [frame_size, frame_size])
+        a = np.reshape(gt[1,:], [self.frame_size, self.frame_size])
         plt.imshow(a)
         plt.subplot(233)
-        a = np.reshape(gt[2,:], [frame_size, frame_size])
+        a = np.reshape(gt[2,:], [self.frame_size, self.frame_size])
         plt.imshow(a)
         plt.subplot(234)
-        a = np.reshape(pred[0,:], [frame_size, frame_size])
+        a = np.reshape(pred[0,:], [self.frame_size, self.frame_size])
         plt.imshow(a)
         plt.subplot(235)
-        a = np.reshape(pred[1,:], [frame_size, frame_size])
+        a = np.reshape(pred[1,:], [self.frame_size, self.frame_size])
         plt.imshow(a)
         plt.subplot(236)
-        a = np.reshape(pred[2,:], [frame_size, frame_size])
+        a = np.reshape(pred[2,:], [self.frame_size, self.frame_size])
         plt.imshow(a)
 
         plt.show()

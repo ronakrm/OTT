@@ -19,7 +19,7 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
         num_in: Input vector size, input layer size.
     """
 
-    def __init__(self, num_units, num_in, reuse=None):
+    def __init__(self, num_units, num_in, nh, nx, ttRank, reuse=None):
         super(OTTRNNCell, self).__init__(_reuse=reuse)
         # save class variables
         self._num_in = num_in
@@ -27,10 +27,11 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
         self._state_size = num_units
         self._output_size = num_units
 
-        maxTTrank = 16
+        ## EDIT THIS TO REFLECT INPUT AND HIDDEN DIM SIZES
+        maxTTrank = ttRank
         # nx = [4,16,16,16,16,4] #prod statesize
-        nx = [4, 8, 8, 8, 8, 4]
-        nh = [4, 4, 4, 4, 4, 4] #prod statesize
+        # nx = [4, 8, 8, 8, 8, 4]
+        # nh = [4, 4, 4, 4, 4, 4] #prod statesize
         
 
         # set up input -> hidden connection

@@ -7,7 +7,7 @@ import math
 
 class MovingMnistProblemDataset(Dataset):
 
-    def __init__(self, num_samples, sample_len, num_sz, frame_size):
+    def __init__(self, num_samples, sample_len, num_sz, frame_size, speed):
 
         self.mnist = self.load_dataset()
         self.num_sz = num_sz # MNIST digit size
@@ -15,6 +15,7 @@ class MovingMnistProblemDataset(Dataset):
         self.frame_size = frame_size # frame size
         self.shape = (self.frame_size, self.frame_size) # frame size
         self.vectdim = int(self.frame_size**2) # vectorized size
+        self.speed = speed # moving rate by pixel
 
         super(MovingMnistProblemDataset,self).__init__(num_samples, sample_len)
 
@@ -70,8 +71,8 @@ class MovingMnistProblemDataset(Dataset):
         for seq_idx in range(seqs):
             # randomly generate direc/speed/position, calculate velocity vector
             direcs = np.pi * (np.random.rand(self.ns_p_img)*2 - 1)
-            speeds = np.random.randint(5, size=self.ns_p_img)+2
-            speeds = 10*np.ones(self.ns_p_img) #np.random.randint(5, size=self.ns_p_img)+2
+            # speeds = np.random.randint(5, size=self.ns_p_img)+2
+            speeds = self.speed*np.ones(self.ns_p_img)
             veloc = [(v*math.cos(d), v*math.sin(d)) for d,v in zip(direcs, speeds)]
             mnist_images = [Image.fromarray(self.get_picture_array(mnist,r,shift=0)).resize((self.num_sz,self.num_sz), Image.ANTIALIAS) \
                    for r in np.random.randint(0, mnist.shape[0], self.ns_p_img)]
