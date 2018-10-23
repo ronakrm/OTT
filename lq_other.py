@@ -8,10 +8,6 @@ from aOTTtfVariable import aOTTtfVariable
 import utils as ut
 from stiefel_ops import proj, retract, gradStep
 
-#from pymanopt import Problem
-#from pymanopt.solvers import StochasticGradient, TrustRegions
-#from pymanopt.manifolds import Product
-
 if __name__ == "__main__":
 
     t0 = time.time()
@@ -19,16 +15,7 @@ if __name__ == "__main__":
     batch_size = 1
     niters = 100000
 
-    # lr = 1e-4
-    # dx = 625
-    # dy = 784
-    # nx = [5,5,5,5]
-    # ny = [4,7,4,7]
-    # n = map(lambda x,y:x*y, nx, ny)
-    # #r = [1, max(n), max(n), max(n), 1]
-    # r = [1,100,100,100,1]
-
-    lr = 1e-2
+    lr = 1e-4
     dx = 256
     dy = 256
     nx = [4,4,4,4]
@@ -52,9 +39,9 @@ if __name__ == "__main__":
 
     W_hat = aOTTtfVariable(shape=[ny,nx], r=r)
 
-    scale = tf.get_variable('scale', shape=[1], initializer=tf.ones_initializer())
-    Y_hat = tf.abs(scale)*tf.transpose(W_hat.mult(tf.transpose(X)))
-    # Y_hat = tf.transpose(W_hat.mult(tf.transpose(X)))
+    # scale = tf.get_variable('scale', shape=[1], initializer=tf.ones_initializer())
+    # Y_hat = tf.abs(scale)*tf.transpose(W_hat.mult(tf.transpose(X)))
+    Y_hat = tf.transpose(W_hat.mult(tf.transpose(X)))
     # Y_hat = 13*tf.transpose(W_hat.mult(tf.transpose(X)))
     loss = tf.reduce_mean(tf.square(Y - Y_hat))
     #loss = tf.reduce_mean(tf.square(c*W_hat.getW() - tf.transpose(W_gt)))
@@ -62,12 +49,12 @@ if __name__ == "__main__":
 
     # Stiefel OTT Update
     aOTTgradsNvars = opt.compute_gradients(loss, W_hat.getQ())
-    Steifupdate = [v.assign(gradStep(v, g, lr)) for g, v in aOTTgradsNvars]
+    Steifupdate = [v.assign(gradStep(v, g, lr=1)) for g, v in aOTTgradsNvars]
 
     # Euclidean Update
-    EucgradsNvars = opt.compute_gradients(loss, [scale])
-    myEucgrads = [(g, v) for g, v in EucgradsNvars]
-    Eucupdate = opt.apply_gradients(myEucgrads)
+    # EucgradsNvars = opt.compute_gradients(loss, [scale])
+    # myEucgrads = [(g, v) for g, v in EucgradsNvars]
+    # Eucupdate = opt.apply_gradients(myEucgrads)
     
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
@@ -79,15 +66,15 @@ if __name__ == "__main__":
         x_mb, y_mb = ut.next_batch(X_data, Y_data, batch_size)        
 
         _, itloss = sess.run([Steifupdate, loss], feed_dict={X: x_mb, Y: y_mb})
-        _, itloss = sess.run([Eucupdate, loss], feed_dict={X: x_mb, Y: y_mb})
+        # _, itloss = sess.run([Eucupdate, loss], feed_dict={X: x_mb, Y: y_mb})
 
         #for j in range(0,100):
 #            _, itloss = sess.run([Steifupdate, loss], feed_dict={X: x_mb, Y: y_mb})
         #for j in range(0,100):
         #_, itloss = sess.run([Eucupdate, loss], feed_dict={X: x_mb, Y: y_mb})
 
-        # print(i,itloss)
-        print(i,itloss,'\tscale\t',sess.run(scale))
+        print(i,itloss)
+        # print(i,itloss,'\tscale\t',sess.run(scale))
     t1 = time.time()
     print('Took seconds:', t1 - t0)
 

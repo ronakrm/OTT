@@ -1,18 +1,26 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
+from tensorflow.python.framework import ops
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import time
 np.set_printoptions(precision=4)
 
-from aOTTtfVariable import aOTTtfVariable
-from sOTTtfVariable import sOTTtfVariable
-from stiefel_ops import gradStep
+# import sys
+# sys.path.append("/vars")
+from vars.sOTTtfVariable import sOTTtfVariable
 from utils import next_batch
 
 from tensorflow.examples.tutorials.mnist import input_data
 
+
+def projDet(v, g, lr):
+    vnew = v - g*lr
+    if vnew.shape[0] == vnew.shape[1]:
+        if tf.linalg.det(vnew) < 0:
+            vnew[:,0] = -1*vnew[:,0]
+    return vnew
 
 def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
     ########## Parameters ##########
@@ -30,6 +38,7 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
 
     ########## First Layer ##########
 
+    # W1 = sOTTtfVariable(shape=[nh,nx], r=r, name='W1')
     W1 = sOTTtfVariable(shape=[nh,nx], r=r, name='W1')
     b1 = tf.get_variable('b1', shape=[625])
 
@@ -59,15 +68,18 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
 
     ########## Optimizer and Gradient Updates ##########
 
-    # opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
     opt = tf.train.GradientDescentOptimizer(learning_rate=lr).minimize(loss)
 
-    # EucGnVs = opt.compute_gradients(loss, [c, b1, W2, b2])
-    # myEucgrads = [(g, v) for g, v in EucGnVs]
-    # Eucupdate = opt.apply_gradients(myEucgrads)
+    # opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+    # Stiefel OTT Update
+    # aOTTgradsNvars = opt.compute_gradients(loss, W1.getQ())
+    # Steifupdate = [v.assign(projDet(v, g, lr=1)) for g, v in aOTTgradsNvars]
 
-    # AottGnVs = opt.compute_gradients(loss, W1.getQ())
-    # Steifupdate = [v.assign(gradStep(X=v, G=g)) for g, v in AottGnVs]
+    # Euclidean Update
+    # EucgradsNvars = opt.compute_gradients(loss, [b1, W2, b2])
+    # EucgradsNvars = opt.compute_gradients(loss, [b1, W2, b2]+W1.getV())
+    # myEucgrads = [(g, v) for g, v in EucgradsNvars]
+    # Eucupdate = opt.apply_gradients(myEucgrads)
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
@@ -103,11 +115,28 @@ def ottMNIST(niters, batch_size, lr, myTTrank, trainX, trainY):
 
 if __name__ == "__main__":
 
+    @ops.RegisterGradient("MatrixExponential")
+    def _expm_grad(op, grad):
+    # We want the backward-mode gradient (left multiplication).
+    # Let X be the NxN input matrix.
+    # Let J(X) be the the N^2xN^2 complete Jacobian matrix of expm at X.
+    # Let Y be the NxN previous gradient in the backward AD (left multiplication)
+    # We have
+    # unvec( ( vec(Y)^T . J(X) )^T )
+    #   = unvec( J(X)^T . vec(Y) )
+    #   = unvec( J(X^T) . vec(Y) )
+    # where the last part (if I am not mistaken) holds in the case of the
+    # exponential and other matrix power series.
+    # It can be seen that this is now the forward-mode derivative
+    # (right multiplication) applied to the Jacobian of the transpose.
+            grad_func = lambda x, y: scipy.linalg.expm_frechet(x, y, compute_expm=False)
+            return tf.py_func(grad_func, [tf.transpose(op.inputs[0]), grad], tf.float64) # List of one Tensor, since we have one input
+
     niters = 1000
     batch_size = 32
-    lr = 1e-4
+    lr = 1e-3
     # myTTranks = [1,2,5,10,20,50]
-    r = 5
+    r = 10
     # myTTranks = 6*[r]
     myTTranks = 100*[r]
 
@@ -142,7 +171,7 @@ if __name__ == "__main__":
     # plt.show()
 
     print(batchaccs)
-    n, bins, patches = plt.hist(batchaccs, 50, facecolor='green', alpha=0.75)
+    n, bins, patches = plt.hist(batchaccs, bins=batch_size, facecolor='green', alpha=0.75)
     plt.xlabel('Batch Accuracy')
     plt.ylabel('Count')
     # plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$'))
