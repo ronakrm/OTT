@@ -1,3 +1,8 @@
+# folders for results, data, and logs
+urnn/logs/*
+urnn/results/*
+*.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
