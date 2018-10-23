@@ -1,10 +1,7 @@
 # Orthogonal Tensor Trains (OTT)
 
 ## Running RNN Experiments
-In the urnn folder (taken largely from https://github.com/Rand0mUsername/urnn), the script mm_evals.py runs the moving MNIST experiment. There are **3** total files that *currently* need to be edited to change the experimental setup:
-- mm_evals.py: change any parameters here first as desired.
-- networks/tf_rnn.py: update the top of the file to reflect mm_evals and TT parameters desired (around line 34).
-- networks/ottrnn_cell.py: update TT rank and parameters to reflect mm_evals
+In the urnn folder (taken largely from https://github.com/Rand0mUsername/urnn), the script mm_evals.py runs the moving MNIST experiment. Parameters specifying the experiments are defined in main-init_data starting from around line 35.
 
 ## Variables
 
