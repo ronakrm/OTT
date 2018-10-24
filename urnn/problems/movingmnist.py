@@ -93,6 +93,5 @@ class MovingMnistProblemDataset(Dataset):
                             veloc[i] = tuple(list(veloc[i][:j]) + [-1 * veloc[i][j]] + list(veloc[i][j+1:]))
                 positions = [(p[0]+v[0],p[1]+v[1]) for p,v in zip(positions, veloc)]
                 # copy additive canvas to data array
-                print(canvas.shape)
                 dataset[seq_idx,frame_idx,:,:] = np.squeeze(canvas)
         return np.round(dataset)
