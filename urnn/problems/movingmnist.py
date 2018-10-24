@@ -72,7 +72,7 @@ class MovingMnistProblemDataset(Dataset):
             # randomly generate direc/speed/position, calculate velocity vector
             direcs = np.pi * (np.random.rand(self.ns_p_img)*2 - 1)
             # speeds = np.random.randint(5, size=self.ns_p_img)+2
-            speeds = self.speed*np.ones(self.ns_p_img)
+            speeds = np.array(self.speed*np.ones(self.ns_p_img))
             veloc = [(v*math.cos(d), v*math.sin(d)) for d,v in zip(direcs, speeds)]
             mnist_images = [Image.fromarray(self.get_picture_array(mnist,r,shift=0)).resize((self.num_sz,self.num_sz), Image.ANTIALIAS) \
                    for r in np.random.randint(0, mnist.shape[0], self.ns_p_img)]
@@ -93,5 +93,6 @@ class MovingMnistProblemDataset(Dataset):
                             veloc[i] = tuple(list(veloc[i][:j]) + [-1 * veloc[i][j]] + list(veloc[i][j+1:]))
                 positions = [(p[0]+v[0],p[1]+v[1]) for p,v in zip(positions, veloc)]
                 # copy additive canvas to data array
-                dataset[seq_idx,:,:,:] = canvas
+                print(canvas.shape)
+                dataset[seq_idx,frame_idx,:,:] = np.squeeze(canvas)
         return np.round(dataset)
