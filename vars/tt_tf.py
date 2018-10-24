@@ -24,7 +24,7 @@ class tt_tf():
 
         # fixed rank for all cores
         if np.array(r).size==1:
-            self.r = np.array([1] + [r]*(self.d) + [1])
+            self.r_array = np.array([1] + [r]*(self.d-1) + [1])
             self.r = r
         else:
             raise ValueError('Different ranks per core not supported.')

@@ -33,30 +33,30 @@ class Main:
         print('Generating data...')
 
         self.mm_batch_size = 32 #5, 10, 32
-        self.mm_epochs = 2 #10, 50, 100
-        self.nsamps = 2000
+        self.mm_epochs = 100 #10, 50, 100
+        self.nsamps = 20000
         self.seqlen = 3
 
         # 64 EXP
-        self.hidden_size = 64
-        self.nh = [2, 4, 4, 2]
-        self.frame_size = 64
-        self.nx = [4, 16, 16, 4]
-        self.ttRank = 128
-        self.digit_size = 28
-        self.speed = 5
+        # self.hidden_size = 64
+        # self.nh = [2, 4, 4, 2]
+        # self.frame_size = 64
+        # self.nx = [4, 16, 16, 4]
+        # self.ttRank = 128
+        # self.digit_size = 28
+        # self.speed = 5
 
         # # 512 EXP
-        # self.hidden_size = 4096
-        # self.nh = [4, 4, 4, 4, 4,4]
-        # frame_size = 512
-        # self.nx = [4,8,16,16,8,4]
-        # self.ttRank = 64
-        # self.digit_size = 112
-        # self.speed = 25
+        self.hidden_size = 512
+        self.nh = [4, 4, 4, 4, 4,4]
+        frame_size = 512
+        self.nx = [4,8,16,16,8,4]
+        self.ttRank = 64
+        self.digit_size = 112
+        self.speed = 25
 
         # # 1024 EXP
-        # self.hidden_size = 4096
+        # self.hidden_size = 1024
         # self.nh = [4, 4, 4, 4, 4,4]
         # frame_size = 1024
         # self.nx = [4,16,16,16,16,4]

@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, '../')
 from vars.sOTTtfVariable import sOTTtfVariable
 # from vars.aOTTtfVariable import aOTTtfVariable
-# from vars.TTtfVariable import TTtfVariable
+from vars.TTtfVariable import TTtfVariable
 # import t3f
 
 
@@ -35,7 +35,7 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
         
 
         # set up input -> hidden connection
-        self.w_ih = sOTTtfVariable(name="w_ih", shape=[nh,nx], r=maxTTrank)
+        self.w_ih = TTtfVariable(name="w_ih", shape=[nh,nx], r=maxTTrank)
         # self.w_ih = tf.get_variable("w_ih", shape=[num_units, num_in], 
                                     # initializer=tf.contrib.layers.xavier_initializer())
         self.b_h = tf.Variable(tf.zeros(self._state_size), # state size actually

@@ -22,7 +22,7 @@ class TTtfVariable(tt_tf):
         Q = []
         for i in range(0, self.d):
             vname = self._name+str(i).zfill(4)
-            myshape = [self.r[i], self.n_out[i], self.n_in[i], self.r[i+1]]
+            myshape = [self.r_array[i], self.n_out[i], self.n_in[i], self.r_array[i+1]]
             tmp = tf.get_variable(name=vname, shape=myshape, initializer=init)
             Q.append(tmp)
         return Q

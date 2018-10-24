@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, '../')
 from vars.sOTTtfVariable import sOTTtfVariable
 # from vars.aOTTtfVariable import aOTTtfVariable
-# from vars.TTtfVariable import TTtfVariable
+from vars.TTtfVariable import TTtfVariable
 
 from utils import rnn_plotter
 
@@ -97,7 +97,7 @@ class TFRNN:
         elif type(self.cell.state_size) == tf.contrib.rnn.LSTMStateTuple:
             self.dyn_rnn_init_states = tf.contrib.rnn.LSTMStateTuple(self.init_states[0], self.init_states[1])
 
-        self.w_ho = sOTTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=self.ttRank)
+        self.w_ho = TTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=self.ttRank)
         # self.w_ho = tf.get_variable("w_ho_"+self.name, shape=[num_out, self.output_size], 
                                             # initializer=tf.contrib.layers.xavier_initializer()) # fixme
         self.b_o = tf.Variable(tf.zeros([num_out, 1]), name="b_o_"+self.name)
@@ -222,7 +222,7 @@ class TFRNN:
             for init_state in self.init_states:
                 feed_dict[init_state] = np.random.uniform(-self.init_state_C, self.init_state_C, [X_val.shape[0], init_state.shape[1]])
             preds = sess.run(self.predictions, feed_dict)
-            utils.rnn_plotter(seq1=X_val[0,:,:], seq2=preds[0,:,:], frame_size=self.frame_size)
+            rnn_plotter(seq1=X_val[0,:,:], seq2=preds[0,:,:], frame_size=self.frame_size)
 
     def test(self, dataset, batch_size, epochs):
         # session
@@ -256,7 +256,7 @@ class TFRNN:
             # else:
             loss, _ = sess.run([self.total_loss, self.train_step], feed_dict)
         else:
-            preds, loss = sess.run([self.predictions, self.total_loss], feed_dict)
+            loss = sess.run(self.total_loss, feed_dict)
             # loss = loss[0]
             # self.valplot(X[0,:], preds[0,:])
         return loss
