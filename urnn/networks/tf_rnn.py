@@ -10,6 +10,8 @@ from vars.sOTTtfVariable import sOTTtfVariable
 # from vars.aOTTtfVariable import aOTTtfVariable
 # from vars.TTtfVariable import TTtfVariable
 
+from utils import rnn_plotter
+
 def serialize_to_file(loss):
     file=open('losses.txt', 'w')
     for l in loss:
@@ -220,31 +222,7 @@ class TFRNN:
             for init_state in self.init_states:
                 feed_dict[init_state] = np.random.uniform(-self.init_state_C, self.init_state_C, [X_val.shape[0], init_state.shape[1]])
             preds = sess.run(self.predictions, feed_dict)
-            self.valplot(X_val[0,:,:], preds[0,:,:])
-
-    def valplot(self, gt, pred):
-
-        plt.subplot(231)
-        print(gt.shape)
-        a = np.reshape(gt[0,:], [self.frame_size, self.frame_size])
-        plt.imshow(a)
-        plt.subplot(232)
-        a = np.reshape(gt[1,:], [self.frame_size, self.frame_size])
-        plt.imshow(a)
-        plt.subplot(233)
-        a = np.reshape(gt[2,:], [self.frame_size, self.frame_size])
-        plt.imshow(a)
-        plt.subplot(234)
-        a = np.reshape(pred[0,:], [self.frame_size, self.frame_size])
-        plt.imshow(a)
-        plt.subplot(235)
-        a = np.reshape(pred[1,:], [self.frame_size, self.frame_size])
-        plt.imshow(a)
-        plt.subplot(236)
-        a = np.reshape(pred[2,:], [self.frame_size, self.frame_size])
-        plt.imshow(a)
-
-        plt.show()
+            utils.rnn_plotter(seq1=X_val[0,:,:], seq2=preds[0,:,:], frame_size=self.frame_size)
 
     def test(self, dataset, batch_size, epochs):
         # session
