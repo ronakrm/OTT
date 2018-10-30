@@ -59,8 +59,8 @@ class TFRNN:
         self.writer = tf.summary.FileWriter(self.log_dir)
         self.runTime = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         self.runName = self.runTime + '_' + self.name + '/'
-        self.respath = 'results/' + self.runName
         self.chkpath = 'chkpts/' + self.runName
+        self.respath = 'results/' + self.runName
         self.valimgpath = self.respath + 'valid/'
         os.makedirs(self.respath)
         os.makedirs(self.valimgpath)
@@ -169,6 +169,9 @@ class TFRNN:
         # else:    
         self.train_step = optimizer.minimize(self.total_loss, name='Optimizer')
 
+        # checkpointing
+        self.saver = tf.train.Saver()
+
         # tensorboard
         self.writer.add_graph(tf.get_default_graph())
         self.writer.flush()
@@ -220,7 +223,7 @@ class TFRNN:
                         total_examples = batch_size * num_batches * epoch_idx + batch_size * batch_idx + batch_size
                         
                         # save intermediate
-                        
+                        self.saver.save(sess, self.chkpath+'model.ckpt')
                         # chkptModel()
 
                         # print stats

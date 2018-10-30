@@ -21,8 +21,6 @@ class seqVisualizer():
                 fig_arr[ii][jj] = self.axarr[ii, jj].imshow(rand_mat, cmap='gray')
 
     def updateViz(self, gt, pd, showSome=True):
-        # print(gt.shape)
-        # print(pd.shape)
         # visualize the first num_sample of the test set
         s = 0
         for r in range(0,self.nrows):
@@ -32,8 +30,6 @@ class seqVisualizer():
                 sample = r_idx*self.nscols + c_idx
 
                 frame = s % self.seqlen
-
-                # print('r',r,'c',c,'ri',r_idx,'ci',c_idx,'samp',sample,'s',s,'frame',frame)
 
                 # GT
                 if r % 2 == 1:
