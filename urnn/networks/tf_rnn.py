@@ -67,6 +67,7 @@ class TFRNN:
         os.makedirs(self.chkpath)
 
         self.myViz = seqVisualizer(seqlen=self.seq_len, frame_size=self.frame_size)
+        plt.ioff()
 
         # init cell
         if rnn_cell == URNNCell:
@@ -233,7 +234,7 @@ class TFRNN:
                 np.save(file=self.valimgpath+'_valid_gt.npy', arr=X_val)
                 np.save(file=self.valimgpath+'_valid_pred.npy', arr=valid_pred)
 
-                self.myViz.updateViz(X_val, valid_pred)
+                self.myViz.updateViz(X_val, valid_pred, showSome=False)
                 plt.savefig(self.valimgpath+'epoch_'+str(epoch_idx).zfill(2)+'_valid_imgs.png', bbox_inches='tight')
 
 

@@ -20,7 +20,7 @@ class seqVisualizer():
                 self.axarr[ii, jj].axis('off')
                 fig_arr[ii][jj] = self.axarr[ii, jj].imshow(rand_mat, cmap='gray')
 
-    def updateViz(self, gt, pd):
+    def updateViz(self, gt, pd, showSome=True):
         # print(gt.shape)
         # print(pd.shape)
         # visualize the first num_sample of the test set
@@ -47,4 +47,6 @@ class seqVisualizer():
 
                 s = s + 1
 
-        plt.pause(0.1)
+        # this shows the figure
+        if showSome:
+            plt.pause(0.1)
