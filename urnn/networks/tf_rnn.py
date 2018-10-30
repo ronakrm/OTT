@@ -3,6 +3,7 @@ import tensorflow as tf
 from .urnn_cell import URNNCell
 from .ottrnn_cell import OTTRNNCell
 import sys
+import os
 import matplotlib.pyplot as plt
 
 sys.path.insert(0, '../')
@@ -10,11 +11,14 @@ from vars.sOTTtfVariable import sOTTtfVariable
 # from vars.aOTTtfVariable import aOTTtfVariable
 from vars.TTtfVariable import TTtfVariable
 
-from utils import rnn_plotter
+# from utils import rnn_plotter
+import datetime as dt
 
-def serialize_to_file(loss):
-    file=open('losses.txt', 'w')
-    for l in loss:
+from seqVisualizer import seqVisualizer
+
+def serialize_to_file(file, losses):
+    file=open(file, 'w')
+    for l in losses:
         file.write("{0}\n".format(l))
     file.close()
 
@@ -53,6 +57,16 @@ class TFRNN:
         self.init_state_C = np.sqrt(3 / (2 * num_hidden))
         self.log_dir = './logs/'
         self.writer = tf.summary.FileWriter(self.log_dir)
+        self.runTime = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.runName = self.runTime + '_' + self.name + '/'
+        self.respath = 'results/' + self.runName
+        self.chkpath = 'chkpts/' + self.runName
+        self.valimgpath = self.respath + 'valid/'
+        os.makedirs(self.respath)
+        os.makedirs(self.valimgpath)
+        os.makedirs(self.chkpath)
+
+        self.myViz = seqVisualizer(seqlen=self.seq_len, frame_size=self.frame_size)
 
         # init cell
         if rnn_cell == URNNCell:
@@ -165,13 +179,15 @@ class TFRNN:
 
     def train(self, dataset, batch_size, epochs):
         # session
+        # config = tf.ConfigProto()
+        # with tf.Session(config=config) as sess:
         with tf.Session() as sess:
             # initialize global vars
             sess.run(tf.global_variables_initializer())
 
             # fetch validation and test sets
             num_batches = dataset.get_batch_count(batch_size)
-            X_val, Y_val = dataset.get_validation_data()
+            X_val, Y_val = dataset.get_validation_data(10*batch_size)
 
             # init loss list
             self.loss_list = []
@@ -193,36 +209,38 @@ class TFRNN:
                     X_batch, Y_batch = dataset.get_batch(batch_idx, batch_size)
 
                     # evaluate
-                    batch_loss = self.evaluate(sess, X_batch, Y_batch, training=True)
-
-                    # save the loss for later
+                    batch_loss, _ = self.evaluate(sess, X_batch, Y_batch, training=True)
                     self.loss_list.append(batch_loss)
+
+                    serialize_to_file(file= self.respath+'batch_losses.txt', losses=self.loss_list)
 
                     # plot
                     if batch_idx%10 == 0:
                         total_examples = batch_size * num_batches * epoch_idx + batch_size * batch_idx + batch_size
                         
+                        # save intermediate
+                        
+                        # chkptModel()
+
                         # print stats
-                        serialize_to_file(self.loss_list)
                         print("Epoch:", '{0:3d}'.format(epoch_idx), 
                               "|Batch:", '{0:3d}'.format(batch_idx), 
                               "|TotalExamples:", '{0:5d}'.format(total_examples), # total training examples
                               "|BatchLoss:", '{0:8.4f}'.format(batch_loss))
 
                 # validate after each epoch
-                validation_loss = self.evaluate(sess, X_val, Y_val)
+                validation_loss, valid_pred = self.evaluate(sess, X_val, Y_val)
+                np.save(file=self.valimgpath+'_valid_gt.npy', arr=X_val)
+                np.save(file=self.valimgpath+'_valid_pred.npy', arr=valid_pred)
+
+                self.myViz.updateViz(X_val, valid_pred)
+                plt.savefig(self.valimgpath+'epoch_'+str(epoch_idx).zfill(2)+'_valid_imgs.png', bbox_inches='tight')
+
 
                 mean_epoch_loss = np.mean(self.loss_list[-num_batches:])
                 print("Epoch Over:", '{0:3d}'.format(epoch_idx), 
                       "|MeanEpochLoss:", '{0:8.4f}'.format(mean_epoch_loss),
                       "|ValidationSetLoss:", '{0:8.4f}'.format(validation_loss),'\n')
-
-            feed_dict = {self.input_x: X_val, self.input_y: Y_val}
-            # fill initial state
-            for init_state in self.init_states:
-                feed_dict[init_state] = np.random.uniform(-self.init_state_C, self.init_state_C, [X_val.shape[0], init_state.shape[1]])
-            preds = sess.run(self.predictions, feed_dict)
-            rnn_plotter(seq1=X_val[0,:,:], seq2=preds[0,:,:], frame_size=self.frame_size)
 
     def test(self, dataset, batch_size, epochs):
         # session
@@ -255,12 +273,13 @@ class TFRNN:
                 # loss, _ = sess.run([self.total_loss, self.E_train_step], feed_dict)
             # else:
             loss, _ = sess.run([self.total_loss, self.train_step], feed_dict)
+            pred = None
         else:
-            loss = sess.run(self.total_loss, feed_dict)
+            loss, pred = sess.run([self.total_loss, self.predictions], feed_dict)
             # loss = loss[0]
             # self.valplot(X[0,:], preds[0,:])
-        return loss
+        return loss, pred
 
-    # loss list getter
-    def get_loss_list(self):
-        return self.loss_list
+    # # loss list getter
+    # def get_loss_list(self):
+    #     return self.loss_list

@@ -18,15 +18,8 @@ from networks.ottrnn_cell import OTTRNNCell
         loss_function):
 '''
 
-loss_path='results/'
-
 glob_learning_rate = 0.001*10
 glob_decay = 0.9
-
-def serialize_loss(loss, name):
-    file=open(loss_path + name, 'w')
-    for l in loss:
-        file.write("{0}\n".format(l))
 
 class Main:
     def init_data(self):
@@ -48,9 +41,9 @@ class Main:
 
         # # 512 EXP
         self.hidden_size = 512
-        self.nh = [4, 4, 4, 4, 4,4]
-        frame_size = 512
-        self.nx = [4,8,16,16,8,4]
+        self.nh = [2, 2, 4, 4, 4, 2]
+        self.frame_size = 512
+        self.nx = [8, 8, 8, 8, 8, 8]
         self.ttRank = 64
         self.digit_size = 112
         self.speed = 25
@@ -66,6 +59,10 @@ class Main:
 
 
         self.vec_size = self.frame_size**2
+
+        assert(np.prod(self.nh)==self.hidden_size)
+        assert(np.prod(self.nx)==self.vec_size)
+
         self.mm_data= MovingMnistProblemDataset(self.nsamps, self.seqlen,
                                 num_sz=self.digit_size,
                                 frame_size=self.frame_size,speed=self.speed)
@@ -77,7 +74,6 @@ class Main:
         print('Training network ', net.name, '... timesteps=',sample_len)
         net.train(dataset, batch_size, epochs)
         # loss_list has one number for each batch (step)
-        serialize_loss(net.get_loss_list(), net.name + sample_len)
         print('Training network ', net.name, ' done.')
 
 

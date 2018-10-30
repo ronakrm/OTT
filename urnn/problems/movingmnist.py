@@ -13,17 +13,28 @@ class MovingMnistProblemDataset(Dataset):
         self.num_sz = num_sz # MNIST digit size
         self.ns_p_img = 1 # number of MNIST images per frame
         self.frame_size = frame_size # frame size
-        self.shape = (self.frame_size, self.frame_size) # frame size
+        self.frame_shape = (self.frame_size, self.frame_size) # frame size
         self.vectdim = int(self.frame_size**2) # vectorized size
         self.speed = speed # moving rate by pixel
 
-        super(MovingMnistProblemDataset,self).__init__(num_samples, sample_len)
+        self.num_samples = num_samples
+        self.sample_len = sample_len
+        if num_samples == -1:
+            return
+        self.X_train, self.Y_train = self.generate(int(num_samples))
+
+    def get_test_data(self):
+        self.X_test, self.Y_test = self.generate(int(num_samples * 0.2))
+        return self.X_test, self.Y_test
+
+    def get_validation_data(self, nsamps):
+        X, Y = self.generate(int(nsamps))
+        return X, Y
 
     def generate(self, num_samples):
         dat = self.generate_moving_mnist(num_samples)
 
         X = np.reshape(dat, [-1, self.sample_len, self.vectdim])
-        Y = X
         return X, X
 
     ## following mostly taken from Tencia Lee via GitHub, from
@@ -65,7 +76,7 @@ class MovingMnistProblemDataset(Dataset):
     # generates and returns video frames in uint8 array
     def generate_moving_mnist(self, seqs=1):
         mnist = self.mnist
-        width, height = self.shape
+        width, height = self.frame_shape
         lims = (x_lim, y_lim) = width-self.num_sz, height-self.num_sz
         dataset = np.empty((seqs, self.sample_len, width, height), dtype=np.float32)
         for seq_idx in range(seqs):
