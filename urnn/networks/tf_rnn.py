@@ -191,7 +191,7 @@ class TFRNN:
 
             # fetch validation and test sets
             num_batches = dataset.get_batch_count(batch_size)
-            X_val, Y_val = dataset.get_validation_data(10*batch_size)
+            X_val, Y_val = dataset.get_validation_data(batch_size)
 
             # init loss list
             self.loss_list = []
