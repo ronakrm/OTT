@@ -39,14 +39,24 @@ class Main:
         # self.digit_size = 28
         # self.speed = 5
 
-        # # 512 EXP
-        self.hidden_size = 512
-        self.nh = [2, 2, 4, 4, 4, 2]
-        self.frame_size = 512
-        self.nx = [8, 8, 8, 8, 8, 8]
+        # # 256 EXP
+        self.hidden_size = 256
+        self.nh = [2, 2, 4, 4, 2, 2]
+        self.frame_size = 256
+        self.nx = [4, 8, 8, 8, 8, 4]
         self.ttRank = 64
-        self.digit_size = 112
-        self.speed = 25
+        self.digit_size = 56
+        self.speed = 5
+
+
+        # # 512 EXP
+        # self.hidden_size = 512
+        # self.nh = [2, 2, 4, 4, 4, 2]
+        # self.frame_size = 512
+        # self.nx = [8, 8, 8, 8, 8, 8]
+        # self.ttRank = 64
+        # self.digit_size = 112
+        # self.speed = 25
 
         # # 1024 EXP
         # self.hidden_size = 1024
