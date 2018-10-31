@@ -31,22 +31,22 @@ class Main:
         self.seqlen = 3
 
         # 64 EXP
-        self.hidden_size = 64
-        self.nh = [2, 4, 4, 2]
-        self.frame_size = 64
-        self.nx = [4, 16, 16, 4]
-        self.ttRank = 64
-        self.digit_size = 28
-        self.speed = 5
+        # self.hidden_size = 64
+        # self.nh = [2, 4, 4, 2]
+        # self.frame_size = 64
+        # self.nx = [4, 16, 16, 4]
+        # self.ttRank = 64
+        # self.digit_size = 28
+        # self.speed = 5
 
         # # 256 EXP
-        # self.hidden_size = 256
-        # self.nh = [2, 2, 4, 4, 2, 2]
-        # self.frame_size = 256
-        # self.nx = [4, 8, 8, 8, 8, 4]
-        # self.ttRank = 128
-        # self.digit_size = 56
-        # self.speed = 5
+        self.hidden_size = 256
+        self.nh = [2, 2, 4, 4, 2, 2]
+        self.frame_size = 256
+        self.nx = [4, 8, 8, 8, 8, 4]
+        self.ttRank = 128
+        self.digit_size = 56
+        self.speed = 5
 
 
         # # 512 EXP

@@ -12,7 +12,10 @@ class MovingMnistProblemDataset(Dataset):
     def __init__(self, num_samples, sample_len, datapath, num_sz, frame_size, speed):
 
         self.datapath = datapath
-        os.makedirs(self.datapath)
+        if Path(self.datapath).exists():
+            pass
+        else:
+            os.makedirs(self.datapath)
 
         self.mnist = self.load_dataset()
         self.num_sz = num_sz # MNIST digit size
