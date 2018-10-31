@@ -26,27 +26,27 @@ class Main:
         print('Generating data...')
 
         self.mm_batch_size = 32 #5, 10, 32
-        self.mm_epochs = 100 #10, 50, 100
+        self.mm_epochs = 10 #10, 50, 100
         self.nsamps = 20000
         self.seqlen = 3
 
         # 64 EXP
-        # self.hidden_size = 64
-        # self.nh = [2, 4, 4, 2]
-        # self.frame_size = 64
-        # self.nx = [4, 16, 16, 4]
-        # self.ttRank = 128
-        # self.digit_size = 28
-        # self.speed = 5
+        self.hidden_size = 64
+        self.nh = [2, 4, 4, 2]
+        self.frame_size = 64
+        self.nx = [4, 16, 16, 4]
+        self.ttRank = 64
+        self.digit_size = 28
+        self.speed = 5
 
         # # 256 EXP
-        self.hidden_size = 256
-        self.nh = [2, 2, 4, 4, 2, 2]
-        self.frame_size = 256
-        self.nx = [4, 8, 8, 8, 8, 4]
-        self.ttRank = 64
-        self.digit_size = 56
-        self.speed = 5
+        # self.hidden_size = 256
+        # self.nh = [2, 2, 4, 4, 2, 2]
+        # self.frame_size = 256
+        # self.nx = [4, 8, 8, 8, 8, 4]
+        # self.ttRank = 128
+        # self.digit_size = 56
+        # self.speed = 5
 
 
         # # 512 EXP
@@ -61,12 +61,14 @@ class Main:
         # # 1024 EXP
         # self.hidden_size = 1024
         # self.nh = [4, 4, 4, 4, 4,4]
-        # frame_size = 1024
+        # self.frame_size = 1024
         # self.nx = [4,16,16,16,16,4]
         # self.ttRank = 64
         # self.digit_size = 224
         # self.speed = 125
 
+        self.datapath = 'data/'+str(self.seqlen)+'_'+str(self.frame_size) \
+                        +'_'+str(self.digit_size)+'_'+str(self.speed)+'/'
 
         self.vec_size = self.frame_size**2
 
@@ -74,7 +76,7 @@ class Main:
         assert(np.prod(self.nx)==self.vec_size)
 
         self.mm_data= MovingMnistProblemDataset(self.nsamps, self.seqlen,
-                                num_sz=self.digit_size,
+                                datapath=self.datapath, num_sz=self.digit_size,
                                 frame_size=self.frame_size,speed=self.speed)
 
         print('Done.')
