@@ -1,0 +1,15 @@
+
+# Some 256 runs
+python mm_run.py --size=256 --nh=[2,2,4,4,2,2] --nx=[4,8,8,8,8,4] --speed=5 --ttRank=16 --digit_size=56 --batch_size=16
+python mm_run.py --size=256 --nh=[2,2,4,4,2,2] --nx=[4,8,8,8,8,4] --speed=5 --ttRank=64 --digit_size=56 --batch_size=16
+python mm_run.py --size=256 --nh=[2,2,4,4,2,2] --nx=[4,8,8,8,8,4] --speed=5 --ttRank=128 --digit_size=56 --batch_size=16
+
+# Some 512 runs
+python mm_run.py --size=512 --nh=[2,2,4,4,4,2] --nx=[8,8,8,8,8,8] --speed=25 --ttRank=16 --digit_size=112 --batch_size=8
+python mm_run.py --size=512 --nh=[2,2,4,4,4,2] --nx=[8,8,8,8,8,8] --speed=25 --ttRank=64 --digit_size=112 --batch_size=8
+python mm_run.py --size=512 --nh=[2,2,4,4,4,2] --nx=[8,8,8,8,8,8] --speed=25 --ttRank=128 --digit_size=112 --batch_size=8
+
+# Some 1024 runs
+python mm_run.py --size=1024 --nh=[2,4,4,4,4,2] --nx=[4,16,16,16,16,4] --speed=125 --ttRank=16 --digit_size=224 --batch_size=4
+python mm_run.py --size=1024 --nh=[2,4,4,4,4,2] --nx=[4,16,16,16,16,4] --speed=125 --ttRank=64 --digit_size=224 --batch_size=4
+python mm_run.py --size=1024 --nh=[2,4,4,4,4,2] --nx=[4,16,16,16,16,4] --speed=125 --ttRank=128 --digit_size=224 --batch_size=4

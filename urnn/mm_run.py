@@ -1,71 +1,30 @@
+import argparse
 import numpy as np
 import tensorflow as tf
 from problems.movingmnist import MovingMnistProblemDataset
 from networks.tf_rnn import TFRNN
 from networks.ottrnn_cell import OTTRNNCell
 
-'''
-        name,
-        rnn_cell,
-        num_in,
-        num_hidden, 
-        num_out,
-        num_target,
-        single_output,
-        activation_hidden,
-        activation_out,
-        optimizer,
-        loss_function):
-'''
-
 glob_learning_rate = 0.001*10
 glob_decay = 0.9
 
 class Main:
-    def init_data(self):
+    def init_data(self, args):
         print('Generating data...')
 
-        self.mm_batch_size = 32 #5, 10, 32
-        self.mm_epochs = 10 #10, 50, 100
-        self.nsamps = 20000
-        self.seqlen = 3
+        self.mm_batch_size = args.batch_size
+        self.mm_epochs = args.epochs
+        self.nsamps = args.nsamps
+        self.seqlen = args.seqlen
 
-        # 64 EXP
-        # self.hidden_size = 64
-        # self.nh = [2, 4, 4, 2]
-        # self.frame_size = 64
-        # self.nx = [4, 16, 16, 4]
-        # self.ttRank = 64
-        # self.digit_size = 28
-        # self.speed = 5
+        self.hidden_size = args.size
+        self.nh = args.nh
+        self.frame_size = args.size
+        self.nx = args.nx
+        self.ttRank = args.ttRank
+        self.digit_size = args.digit_size
+        self.speed = args.speed
 
-        # # 256 EXP
-        self.hidden_size = 256
-        self.nh = [2, 2, 4, 4, 2, 2]
-        self.frame_size = 256
-        self.nx = [4, 8, 8, 8, 8, 4]
-        self.ttRank = 128
-        self.digit_size = 56
-        self.speed = 5
-
-
-        # # 512 EXP
-        # self.hidden_size = 512
-        # self.nh = [2, 2, 4, 4, 4, 2]
-        # self.frame_size = 512
-        # self.nx = [8, 8, 8, 8, 8, 8]
-        # self.ttRank = 64
-        # self.digit_size = 112
-        # self.speed = 25
-
-        # # 1024 EXP
-        # self.hidden_size = 1024
-        # self.nh = [4, 4, 4, 4, 4,4]
-        # self.frame_size = 1024
-        # self.nx = [4,16,16,16,16,4]
-        # self.ttRank = 64
-        # self.digit_size = 224
-        # self.speed = 125
 
         self.datapath = 'data/'+str(self.seqlen)+'_'+str(self.frame_size) \
                         +'_'+str(self.digit_size)+'_'+str(self.speed)+'/'
@@ -105,7 +64,7 @@ class Main:
             activation_hidden = tf.tanh, # modReLU
             activation_out = tf.identity,
             optimizer = tf.train.RMSPropOptimizer(learning_rate=glob_learning_rate, decay=glob_decay),
-            loss_function = tf.nn.sigmoid_cross_entropy_with_logits,
+            loss_function = tf.squared_difference,
             seq_len = self.seqlen,
             ttRank = self.ttRank,
             imTTmodes = self.nx,
@@ -120,11 +79,26 @@ class Main:
         print('Starting training...')
 
         # MOVING MNIST
-        main.train_ottrnn()
+        self.train_ottrnn()
         
         
         print('Done and done.')
 
-main=Main()
-main.init_data()
-main.train_networks()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-n', '--nsamps', type=int, default = 20000)
+    parser.add_argument('-e', '--epochs', type=int, default = 100)
+    parser.add_argument('-l', '--seqlen', type=int, default = 3)
+    parser.add_argument('-b', '--batch_size', type=int, default = 4)
+    parser.add_argument('-s', '--size', type=int, default = 64)
+    parser.add_argument('-t', '--ttRank', type=int, default = 64)
+    parser.add_argument('-d', '--digit_size', type=int, default = 28)
+    parser.add_argument('-v', '--speed', type=int, default = 5)
+    parser.add_argument('--nx', default = [4, 16, 16, 4])
+    parser.add_argument('--nh', default = [2,  4,  4, 2])
+    args = parser.parse_args()
+
+
+    mymain=Main()
+    mymain.init_data(args)
+    mymain.train_networks()

@@ -66,9 +66,6 @@ class TFRNN:
         os.makedirs(self.valimgpath)
         os.makedirs(self.chkpath)
 
-        self.myViz = seqVisualizer(seqlen=self.seq_len, frame_size=self.frame_size)
-        plt.ioff()
-
         # init cell
         if rnn_cell == URNNCell:
             self.cell = rnn_cell(num_units = num_hidden, num_in = num_in)
@@ -182,6 +179,10 @@ class TFRNN:
         print('Network __init__ over. Number of trainable params=', t_params)
 
     def train(self, dataset, batch_size, epochs):
+
+        self.myViz = seqVisualizer(batch_size=batch_size, seqlen=self.seq_len, frame_size=self.frame_size)
+        plt.ioff()
+
         # session
         # config = tf.ConfigProto()
         # with tf.Session(config=config) as sess:

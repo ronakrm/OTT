@@ -42,7 +42,7 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
                                     name="b_h")
         
         self.W1 = sOTTtfVariable(name="W1", shape=[nh,nh], r=maxTTrank)
-        # self.W1 = TTtfVariable(name="W1", shape=[ny,nx], r=r)
+        # self.W1 = TTtfVariable(name="W1", shape=[nh,nh], r=maxTTrank)
         # initializer = t3f.glorot_initializer([ny, nx], tt_rank=r)
         # self.W1 = t3f.get_variable('W1', initializer=initializer) 
         # self.W1 = tf.get_variable(name="W1", shape=[num_units, num_units],
