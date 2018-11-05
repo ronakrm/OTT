@@ -8,7 +8,7 @@ class seqVisualizer():
         nViz = np.min([int(batch_size), 12])
         self.nsrows = int(nViz/4)# 3
         self.nscols = int(nViz/3)# 4
-        print(self.nsrows, self.nscols)
+
         self.num_samples = self.nsrows * self.nscols
         self.nrows = self.nsrows * 2 # 2 here is gt and pred
         self.seqlen = seqlen
@@ -35,10 +35,10 @@ class seqVisualizer():
 
                 # GT
                 if r % 2 == 1:
-                    tmp = np.reshape(pd[sample,frame,:], [self.frame_size, self.frame_size])
+                    tmp = np.reshape(pd[sample,frame,:].T, [self.frame_size, self.frame_size])
                 # PRED
                 else:
-                    tmp = np.reshape(gt[sample,frame,:], [self.frame_size, self.frame_size])
+                    tmp = np.reshape(gt[sample,frame,:].T, [self.frame_size, self.frame_size])
                 self.axarr[r, c].clear()
                 self.axarr[r, c].imshow(tmp, clim=(0.0, 1.0))
                 self.axarr[r, c].axis('off')

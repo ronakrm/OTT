@@ -17,10 +17,9 @@ class Main:
         self.mm_epochs = args.epochs
         self.nsamps = args.nsamps
         self.seqlen = args.seqlen
-
-        self.hidden_size = args.size
+        self.hidden_size = args.sh
         self.nh = ast.literal_eval(args.nh)
-        self.frame_size = args.size
+        self.frame_size = args.frame_size
         self.nx = ast.literal_eval(args.nx)
         self.ttRank = int(args.ttRank)
         self.digit_size = int(args.digit_size)
@@ -91,12 +90,13 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epochs', type=int, default = 100)
     parser.add_argument('-l', '--seqlen', type=int, default = 3)
     parser.add_argument('-b', '--batch_size', type=int, default = 4)
-    parser.add_argument('-s', '--size', type=int, default = 64)
+    parser.add_argument('-f', '--frame_size', type=int, default = 64)
     parser.add_argument('-t', '--ttRank', type=int, default = 64)
     parser.add_argument('-d', '--digit_size', type=int, default = 28)
     parser.add_argument('-v', '--speed', type=int, default = 5)
-    parser.add_argument('--nx', default = [4, 16, 16, 4])
-    parser.add_argument('--nh', default = [2,  4,  4, 2])
+    parser.add_argument('--sh', type=int, default = 1024)
+    parser.add_argument('--nx', default = '[4, 16, 16, 4]')
+    parser.add_argument('--nh', default = '[4,  8,  8, 4]')
     args = parser.parse_args()
 
 

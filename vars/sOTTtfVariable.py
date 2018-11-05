@@ -45,6 +45,8 @@ class sOTTtfVariable(tt_tf):
                         # sparse representation for skew symm matrix
                         myvar = tf.get_variable(vname, shape=[sparseshape,1], initializer=init)
 
+                        #clipped = tf.clip_by_value(myvar, clip_value_min=-1., clip_value_max=1.)
+
                         # dense rep
                         striu = tf.SparseTensor(indices=indices, values=tf.squeeze(myvar), dense_shape=[self.r, self.r])
                         triu = tf.sparse_add(striu, tf.zeros(striu.dense_shape)) 

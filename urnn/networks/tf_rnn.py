@@ -109,9 +109,9 @@ class TFRNN:
         elif type(self.cell.state_size) == tf.contrib.rnn.LSTMStateTuple:
             self.dyn_rnn_init_states = tf.contrib.rnn.LSTMStateTuple(self.init_states[0], self.init_states[1])
 
-        self.w_ho = TTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=self.ttRank)
-        # self.w_ho = tf.get_variable("w_ho_"+self.name, shape=[num_out, self.output_size], 
-                                            # initializer=tf.contrib.layers.xavier_initializer()) # fixme
+        # self.w_ho = TTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=self.ttRank)
+        self.w_ho = tf.get_variable("w_ho_"+self.name, shape=[num_out, self.output_size], 
+                                            initializer=tf.contrib.layers.xavier_initializer()) # fixme
         self.b_o = tf.Variable(tf.zeros([num_out, 1]), name="b_o_"+self.name)
 
         # run the dynamic rnn and get hidden layer outputs
@@ -130,9 +130,9 @@ class TFRNN:
             outputs_o = activation_out(preact) # [batch_size, num_out]
         else:
             # outputs_h: [batch_size, max_time, m_out]
-            # out_h_mul = tf.einsum('ijk,kl->ijl', outputs_h, tf.transpose(self.w_ho))
-            # preact = out_h_mul + tf.transpose(self.b_o)
-            preact = tf.transpose(self.w_ho.t_mult(tf.transpose(outputs_h), self.seq_len)) + tf.transpose(self.b_o)
+            out_h_mul = tf.einsum('ijk,kl->ijl', outputs_h, tf.transpose(self.w_ho))
+            preact = out_h_mul + tf.transpose(self.b_o)
+            # preact = tf.transpose(self.w_ho.t_mult(tf.transpose(outputs_h), self.seq_len)) + tf.transpose(self.b_o)
             outputs_o = activation_out(preact) # [batch_size, time_step, num_out]
             
         self.predictions = outputs_o
