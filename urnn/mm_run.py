@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import ast
 import tensorflow as tf
 from problems.movingmnist import MovingMnistProblemDataset
 from networks.tf_rnn import TFRNN
@@ -18,12 +19,12 @@ class Main:
         self.seqlen = args.seqlen
 
         self.hidden_size = args.size
-        self.nh = args.nh
+        self.nh = ast.literal_eval(args.nh)
         self.frame_size = args.size
-        self.nx = args.nx
-        self.ttRank = args.ttRank
-        self.digit_size = args.digit_size
-        self.speed = args.speed
+        self.nx = ast.literal_eval(args.nx)
+        self.ttRank = int(args.ttRank)
+        self.digit_size = int(args.digit_size)
+        self.speed = int(args.speed)
 
 
         self.datapath = 'data/'+str(self.seqlen)+'_'+str(self.frame_size) \
