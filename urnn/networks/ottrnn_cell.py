@@ -35,9 +35,9 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
         
 
         # set up input -> hidden connection
-        # self.w_ih = TTtfVariable(name="w_ih", shape=[nh,nx], r=maxTTrank)
-        self.w_ih = tf.get_variable("w_ih", shape=[num_units, num_in], 
-                                    initializer=tf.contrib.layers.xavier_initializer())
+        self.w_ih = TTtfVariable(name="w_ih", shape=[nh,nx], r=maxTTrank)
+        # self.w_ih = tf.get_variable("w_ih", shape=[num_units, num_in], 
+                                    # initializer=tf.contrib.layers.xavier_initializer())
         self.b_h = tf.Variable(tf.zeros(self._state_size), # state size actually
                                     name="b_h")
         
@@ -76,8 +76,8 @@ class OTTRNNCell(tf.contrib.rnn.RNNCell):
         #print("cell.call state:", state.shape, state.dtype)
 
         # prepare input linear combination
-        inputs_mul = tf.matmul(inputs, tf.transpose(self.w_ih)) # [batch_sz, 2*num_units]
-        # inputs_mul = tf.transpose(self.w_ih.mult(tf.transpose(inputs)))
+        # inputs_mul = tf.matmul(inputs, tf.transpose(self.w_ih)) # [batch_sz, 2*num_units]
+        inputs_mul = tf.transpose(self.w_ih.mult(tf.transpose(inputs)))
         # [batch_sz, num_units]
 
         state_mul = tf.transpose(self.W1.mult(tf.transpose(state)))

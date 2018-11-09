@@ -6,7 +6,7 @@ from problems.movingmnist import MovingMnistProblemDataset
 from networks.tf_rnn import TFRNN
 from networks.ottrnn_cell import OTTRNNCell
 
-glob_learning_rate = 0.001*10
+glob_learning_rate = 0.001
 glob_decay = 0.9
 
 class Main:
