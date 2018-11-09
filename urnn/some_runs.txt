@@ -1,0 +1,4 @@
+python mm_run.py --batch_size=16 --sh 1024 --nh=[4,8,8,4] --nx=[16,16,16,16] --speed=25 --ttRank=32 --digit_size=112 --frame_size=256 --epochs=10
+python mm_run.py --batch_size=16 --sh 4096 --nh=[8,8,8,8] --nx=[16,16,16,16] --speed=25 --ttRank=32 --digit_size=112 --frame_size=256 --epochs=10
+
+python mm_run.py --batch_size=8 --sh 4096 --nh=[8,8,8,8] --nx=[32,32,32,32] --speed=125 --ttRank=32 --digit_size=448 --frame_size=1024 --epochs=10 --nsamps 1000

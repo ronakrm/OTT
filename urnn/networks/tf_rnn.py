@@ -109,7 +109,7 @@ class TFRNN:
         elif type(self.cell.state_size) == tf.contrib.rnn.LSTMStateTuple:
             self.dyn_rnn_init_states = tf.contrib.rnn.LSTMStateTuple(self.init_states[0], self.init_states[1])
 
-        self.w_ho = TTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=int(self.ttRank*8))
+        self.w_ho = TTtfVariable(name="w_ho_"+self.name, shape=[self.no, self.nh], r=int(self.ttRank))
         # self.w_ho = tf.get_variable("w_ho_"+self.name, shape=[num_out, self.output_size], 
                                             # initializer=tf.contrib.layers.xavier_initializer()) # fixme
         self.b_o = tf.Variable(tf.zeros([num_out, 1]), name="b_o_"+self.name)
