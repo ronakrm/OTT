@@ -35,10 +35,10 @@ class seqVisualizer():
 
                 # PRED
                 if r % 2 == 1:
-                    tmp = np.reshape(pd[sample,frame,:].T, [self.frame_size, self.frame_size])
+                    tmp = np.flipud(np.rot90(np.reshape(pd[sample,frame,:], [self.frame_size, self.frame_size])))
                 # GT
                 else:
-                    tmp = np.reshape(gt[sample,frame,:].T, [self.frame_size, self.frame_size])
+                    tmp = np.flipud(np.rot90(np.reshape(gt[sample,frame,:], [self.frame_size, self.frame_size])))
                 self.axarr[r, c].clear()
                 self.axarr[r, c].imshow(tmp, clim=(0.0, 1.0))
                 self.axarr[r, c].axis('off')
