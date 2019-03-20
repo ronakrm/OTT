@@ -1,0 +1,7 @@
+mm_run.py --seqlen 3 --ttRank 64 --ott1
+mm_run.py --seqlen 3 --ttRank 64 --ott2
+mm_run.py --seqlen 3 --ttRank 64 --ott1 --ott2
+
+mm_run.py --seqlen 8 --ttRank 64 --ott1
+mm_run.py --seqlen 8 --ttRank 64 --ott2
+mm_run.py --seqlen 8 --ttRank 64 --ott1 --ott2

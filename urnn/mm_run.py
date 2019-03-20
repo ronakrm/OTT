@@ -94,7 +94,7 @@ class Main:
             ttVar1 = self.tVar1,
             ttVar2 = self.tVar2,
             viz = viz,
-            ShowViz = True,
+            ShowViz = False,
             b_print_rate = 1)
 
         self.train_network(self.mm_ottrnn, self.mm_data, 
