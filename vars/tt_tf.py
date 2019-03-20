@@ -86,11 +86,11 @@ class tt_tf():
     # for glorot/xavier initialization
     def calcCoreGlorotSTD(self, n_dim, d, r):
         # glorot init variable
-        lamb = 2.0 / (self.n_dim)
+        lamb = 2.0 / (n_dim)
         stddev = np.sqrt(lamb)
-        cr_exp = -1.0 / (2* self.d)
-        var = np.prod(self.r ** cr_exp)
-        core_stddev = stddev ** (1.0 / self.d) * var
+        cr_exp = -1.0 / (2* d)
+        var = np.prod(r ** cr_exp)
+        core_stddev = stddev ** (1.0 / d) * var
         return core_stddev
 
 

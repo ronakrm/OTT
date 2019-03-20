@@ -45,12 +45,12 @@ class TTtfVariable(tt_tf):
                         # Vector for first and last cores of TT
                         myvar = tf.get_variable(vname, shape=[self.r,1], initializer=init)
                         # myvar = tf.nn.l2_normalize(myvar)
-                        # myvar = tf.nn.dropout(myvar, keep_prob=0.5)
+                        myvar = tf.nn.dropout(myvar, keep_prob=0.75)
                         tmp = myvar
                     else:
                         # sparse representation for skew symm matrix
                         myvar = tf.get_variable(vname, shape=[self.r,self.r], initializer=init)
-                        # myvar = tf.nn.dropout(myvar, keep_prob=0.5)
+                        myvar = tf.nn.dropout(myvar, keep_prob=0.75)
                         tmp = myvar
                     
                     #tmp = tmp/tf.linalg.norm(tmp, ord=2)

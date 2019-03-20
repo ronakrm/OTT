@@ -7,9 +7,9 @@ class aOTTtfVariable(tt_tf):
 
     def __init__(self, shape, r, name='aOTT_Var_default'):
         super(aOTTtfVariable,self).__init__(shape, r, name)
-        # core_stddev = self.calcCoreGlorotSTD(self.n_dim, self.d, self.r):
-        # init = tf.random_normal_initializer(mean=0., stddev=core_stddev, seed=0)
-        init = tf.orthogonal_initializer()
+        core_stddev = self.calcCoreGlorotSTD(self.in_dim*self.out_dim, self.d, self.r)
+        init = tf.random_normal_initializer(mean=0., stddev=core_stddev, seed=0)
+        # init = tf.orthogonal_initializer()
         
         # setup variables
         self.Q = self.setupQ(init)
@@ -24,10 +24,10 @@ class aOTTtfVariable(tt_tf):
             for j in range(0, self.n_out[i]):
                 for k in range(0, self.n_in[i]):
                     vname = self._name+str(i).zfill(4)+str(j).zfill(4)+str(k).zfill(4)
-                    if self.r[i+1] > self.r[i]:
-                       myshape = [self.r[i+1], self.r[i]]
+                    if self.r_array[i+1] > self.r_array[i]:
+                       myshape = [self.r_array[i+1], self.r_array[i]]
                     else:
-                       myshape = [self.r[i], self.r[i+1]]
+                       myshape = [self.r_array[i], self.r_array[i+1]]
                     tmp = tf.get_variable(vname, shape=myshape, initializer=init)
                     Q.append( tmp )
         return Q
@@ -43,7 +43,7 @@ class aOTTtfVariable(tt_tf):
                 tmp.append(tf.stack(self.Q[start:end], axis=1))
                 start = end
             tmp = tf.stack(tmp, axis=1)
-            if self.r[i+1] > self.r[i]:
+            if self.r_array[i+1] > self.r_array[i]:
                 U.append( tf.transpose(tmp, perm=[3, 1, 2, 0]) )
             else:
                 U.append( tmp )            

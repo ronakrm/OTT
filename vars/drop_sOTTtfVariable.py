@@ -41,12 +41,12 @@ class sOTTtfVariable(tt_tf):
                         # Vector for first and last cores of TT
                         myvar = tf.get_variable(vname, shape=[self.r,1], initializer=init)
                         # myvar = tf.nn.l2_normalize(myvar)
-                        # myvar = tf.nn.dropout(myvar, keep_prob=0.8)
+                        myvar = tf.nn.dropout(myvar, keep_prob=0.75)
                         tmp = myvar
                     else:
                         # sparse representation for skew symm matrix
                         myvar = tf.get_variable(vname, shape=[sparseshape,1], initializer=init)
-                        # myvar = tf.nn.dropout(myvar, keep_prob=0.8)
+                        myvar = tf.nn.dropout(myvar, keep_prob=0.75)
 
                         #clipped = tf.clip_by_value(myvar, clip_value_min=-1., clip_value_max=1.)
 
@@ -57,19 +57,12 @@ class sOTTtfVariable(tt_tf):
                         # skew symmetric
                         A = triu - tf.transpose(triu)
                         
-                        # tmp = tf.linalg.expm(A)
+                        # tmp = tf.linalg.expm(sksym)
 
                         # Cayley transform to Orthogonal SO(r)
                         I = tf.eye(self.r)
-                        tmp = tf.matmul(I - A , tf.matrix_inverse(I + A)) # 43.58 secs
-                        # tmp = A
-                        # invapprox = tfpmath.pinv(I + self.r*A) # 58.09 secs
-                        # A2 = tf.matmul(self.r*A,self.r*A)
-                        # invapprox = I - self.r*A + A2 - tf.matmul(A2, self.r*A) # 63 secs
-                        # tmp = tf.matmul(I - A, invapprox)
-                        # tmp = tf.linalg.lstsq(I + A, I - A, fast=True, l2_regularizer=1e-8) # 57.4 secs
-                        # tmp = A
-                        # tmp = tf.linalg.expm(A) # crazy
+                        tmp = tf.matmul(I - A , tf.matrix_inverse(I + self.r*A))
+                        # tmp = tf.linalg.lstsq(I + A, I - A, fast=True, l2_regularizer=1e-4)
                     
                     #tmp = tmp/tf.linalg.norm(tmp, ord=2)
                     Q.append( tmp )
