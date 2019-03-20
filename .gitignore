@@ -2,7 +2,9 @@
 urnn/chkpts/*
 urnn/losses.txt
 urnn/logs/*
+urnn/res/*
 urnn/results/*
+urnn/data/*
 *.gz
 
 # Byte-compiled / optimized / DLL files

@@ -2,9 +2,18 @@ import argparse
 import numpy as np
 import ast
 import tensorflow as tf
+# from problems.s_movingmnist import MovingMnistProblemDataset
 from problems.movingmnist import MovingMnistProblemDataset
-from networks.tf_rnn import TFRNN
-from networks.ottrnn_cell import OTTRNNCell
+from networks.tfrnn import TFRNN
+# from networks.ottrnn_cell import OTTRNNCell as mycell
+from networks.ttrnn_straight import TTRNNCell as mycell
+# from networks.rnn_straight import myRNNCell as mycell
+from vars.sOTTtfVariable import sOTTtfVariable as mytt
+# from vars.TTtfVariable import TTtfVariable as mytt
+
+import sys
+sys.path.insert(0, '../')
+from seqVisualizer import seqVisualizer
 
 glob_learning_rate = 0.001
 glob_decay = 0.9
@@ -41,8 +50,7 @@ class Main:
         print('Done.')
 
     def train_network(self, net, dataset, batch_size, epochs):
-        sample_len = str(dataset.get_sample_len())
-        print('Training network ', net.name, '... timesteps=',sample_len)
+        print('Training network ', net.name, '... timesteps=',self.seqlen)
         net.train(dataset, batch_size, epochs)
         # loss_list has one number for each batch (step)
         print('Training network ', net.name, ' done.')
@@ -50,6 +58,8 @@ class Main:
 
     def train_ottrnn(self):
         print('Initializing and training OTTRNN...')
+
+        viz = seqVisualizer(batch_size=self.mm_batch_size, seqlen=self.seqlen, frame_size=np.array([self.frame_size, self.frame_size]))
 
         # moving mnist 
         tf.reset_default_graph()
@@ -60,17 +70,44 @@ class Main:
             num_out = self.vec_size,
             num_target = self.vec_size,
             single_output = False,
-            rnn_cell = OTTRNNCell,
-            activation_hidden = tf.tanh, # modReLU
-            activation_out = tf.identity,
+            rnn_cell = mycell,
+            activation_hidden = tf.nn.relu, # modReLU
+            activation_out = tf.nn.sigmoid,
             optimizer = tf.train.RMSPropOptimizer(learning_rate=glob_learning_rate, decay=glob_decay),
-            loss_function = tf.squared_difference,
+            loss_function = tf.nn.sigmoid_cross_entropy_with_logits,
             seq_len = self.seqlen,
             ttRank = self.ttRank,
             imTTmodes = self.nx,
-            hdTTmodes = self.nh)
+            hdTTmodes = self.nh,
+            ttVar = mytt,
+            viz = viz,
+            ShowViz = True,
+            b_print_rate = 1)
+
         self.train_network(self.mm_ottrnn, self.mm_data, 
                            self.mm_batch_size, self.mm_epochs)
+
+
+        # tf.reset_default_graph()
+        # self.mm_lstm=TFRNN(
+        #     name="mm_lstm",
+        #     num_in = self.vec_size,
+        #     num_hidden = self.hidden_size,
+        #     num_out = self.vec_size,
+        #     num_target = self.vec_size,
+        #     single_output = True,
+        #     rnn_cell=tf.contrib.rnn.LSTMCell,
+        #     activation_hidden=tf.tanh,
+        #     activation_out=tf.identity,
+        #     optimizer=tf.train.RMSPropOptimizer(learning_rate=glob_learning_rate, decay=glob_decay),
+        #     loss_function=tf.squared_difference,
+        #     ttRank = self.ttRank,
+        #     seq_len = self.seqlen,
+        #     imTTmodes = None,
+        #     hdTTmodes = self.nh,
+        #     viz = self.MyViz)
+        # self.train_network(self.mm_lstm, self.mm_data, 
+        #                    self.mm_batch_size, self.mm_epochs)
 
         print('Init and training OTTRNN done.')
 
