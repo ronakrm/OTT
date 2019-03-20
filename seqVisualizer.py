@@ -5,7 +5,8 @@ import matplotlib.image as mpimg
 class seqVisualizer():
     def __init__(self, batch_size=12, seqlen=3, frame_size=[0,0]):
         # Initialize subplots so we can use set_data for repeated plotting inside the loop
-        nViz = np.min([int(batch_size), 12])
+        nViz = np.min([int(batch_size), 12]) + 0.5
+        # nViz = 5
         self.nsrows = int(nViz/4)# 3
         self.nscols = int(nViz/3)# 4
 

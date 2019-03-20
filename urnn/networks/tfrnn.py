@@ -26,7 +26,8 @@ class TFRNN:
         optimizer,
         loss_function,
         seq_len,
-        ttVar=None,
+        ttVar1=None,
+        ttVar2=None,
         ttRank=None,
         imTTmodes=None,
         hdTTmodes=None,
@@ -46,7 +47,7 @@ class TFRNN:
         self.log_dir = './logs/'
         # self.writer = tf.summary.FileWriter(self.log_dir)
         self.runTime = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.runName = self.runTime + '_' + self.name + '/'
+        self.runName = self.name + '_' + self.runTime + '/'
         self.chkpath = 'chkpts/' + self.runName
         self.respath = 'res/' + self.runName
         self.valimgpath = self.respath + 'valid/'
@@ -61,10 +62,13 @@ class TFRNN:
             self.cell = rnn_cell(input_shape = imTTmodes,
                                  hidden_shape = hdTTmodes,
                                  output_shape = imTTmodes,
-                                 ttRank=ttRank, ttvar=ttVar,
+                                 ttRank=ttRank, ttvar1=ttVar1, ttvar2=ttVar2,
                                  activation = activation_hidden)
         else:
-            self.cell = rnn_cell(num_units = num_hidden, activation = activation_hidden)
+            self.cell = rnn_cell(input_shape = imTTmodes,
+                                 hidden_shape = hdTTmodes,
+                                 output_shape = imTTmodes,
+                                 activation = activation_hidden)
 
         # extract output size
         self.output_size = self.cell.output_size
@@ -157,6 +161,10 @@ class TFRNN:
         # number of trainable params
         t_params = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print('Network __init__ over. Number of trainable params=', t_params)
+        if t_params > 1000000000:
+            print('Network probably too large for a single GPU, exiting.')
+            print('Check network architecture to make sure it fits.')
+            exit(0)
 
     def train(self, dataset, batch_size, epochs):           
 
@@ -267,11 +275,9 @@ class TFRNN:
 
     def validate(self, sess, dataset, epoch_idx, batch_size):
         # fetch validation and test sets
-        num_batches = dataset.get_batch_count(batch_size)   
         X_val, Y_val = dataset.get_validation_data(batch_size)
 
         validation_loss, valid_pred = self.evaluate(sess, X_val, Y_val)
-
 
         if self.single_output:
             gttmp = np.concatenate((X_val, np.expand_dims(Y_val,axis=1)), axis=1)
@@ -279,13 +285,14 @@ class TFRNN:
         else:
             gttmp = X_val
             pdtmp = valid_pred
+
         self.viz.updateViz(gt=gttmp, pd=pdtmp)
         self.viz.saveIt(self.valimgpath+'epoch_'+str(epoch_idx).zfill(2)+'_valid_imgs.png')
         if self.ShowViz == True:
             self.viz.showIt()
 
 
-        np.save(file=self.valimgpath+'_valid_gt.npy', arr=X_val)
+        np.save(file=self.valimgpath+'_valid_gt.npy', arr=Y_val)
         np.save(file=self.valimgpath+'_valid_pred.npy', arr=valid_pred)
 
         return validation_loss
