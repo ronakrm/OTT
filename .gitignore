@@ -6,6 +6,9 @@ urnn/res/*
 urnn/results/*
 urnn/data/*
 *.gz
+*.npy
+*.csv
+*.npz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

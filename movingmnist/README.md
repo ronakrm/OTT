@@ -1,0 +1,1 @@
+Code somewhat adapted from  [https://github.com/Rand0mUsername/urnn](https://github.com/Rand0mUsername/urnn). some_runs.txt has some examples. The standard MNIST training dataset should be downloaded to the data/ folder, then everything should run as given.

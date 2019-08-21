@@ -1,24 +1,17 @@
 # Orthogonal Tensor Trains (OTT)
 
-## Running RNN Experiments
-In the urnn folder (taken largely from https://github.com/Rand0mUsername/urnn), the script mm_evals.py runs the moving MNIST experiment. Parameters specifying the experiments are defined in main-init_data starting from around line 35.
+Various implementations for the experiments in the paper below. Simulations and moving MNIST include Tensorflow implementations, while Hollywood2 and Neuroimaging experiments were conducted using PyTorch.
 
-## Variables
+Some details (re: neuroimaging data) have been omitted.
 
-sOTT is the square, SO(n) version. Variables are stored in vectors, mapped to a skew symmetric matrix, and transformed into the orthogonal cores via the Cayley Map.
+## Dependencies
 
-aOTT is the approximate orthogonal representation. Each core of the TT is represented by a similar sized orthogonal matrix, which is orthogonal by initialization and projection via gradStep in stiefel_ops.py
+Works with Tensorflow 1.12 and 1.14. Pytorch 1.0.1 was used for neuroimaging experiments.
+Keras 2.1.2 (with TF 1.12) was used for Hollywood2 experiments.
 
-sOTT/aOTT/TT should have the same interfaces, so to test differences it only requires replacing the variable and doing a stiefel update as needed for aOTT. 
+## Reference and Links
+        "Scaling Recurrent Models via Orthogonal Approximations in Tensor Trains"
+        Ronak Mehta, Rudrasis Chakraborty, Yunyang Xiong, Vikas Singh
+        In International Conference on Computer Vision 2019 (ICCV-2019).
 
-tfTensor.py files are strict tensors, without operator/multiplication definitions.
-tfVariable.py files are -operators- in the sense that the TT has an input dimension and an output dimension. The mult function computes matrix multiplication with the tensor representation without explicit blow up of the full tensor.
-
-Q() functions are the variable/core representations. U() functions are the full tensor train representations, and W() functions are the matricized versions of the operators.
-
-stiefel_ops.py is taken largely from pymanopt.
-
-lq_other.py is a simple test of aOTT.
-lq_sott.py is a simple test of sOTT.
-
-mnist_ott.py is the simple classification task for MNIST with 1 -OTT variable layer.
+A link to the paper will be updated as it is available!

@@ -1,9 +1,0 @@
-python mm_run.py --batch_size=16 --sh 1024 --nh=[4,8,8,4] --nx=[16,16,16,16] --speed=25 --ttRank=32 --digit_size=112 --frame_size=256 --epochs=10
-python mm_run.py --batch_size=16 --sh 4096 --nh=[8,8,8,8] --nx=[16,16,16,16] --speed=25 --ttRank=32 --digit_size=112 --frame_size=256 --epochs=10
-
-python mm_run.py --batch_size=8 --sh 16384 --nh=[8,16,16,8] --nx=[32,32,32,32] --speed=125 --ttRank=32 --digit_size=448 --frame_size=1024 --epochs=20 --nsamps 20000
-
-
-
-ADNI:
-python adni_run.py --batch_size=8 --sh 8192 --nh=[16,32,16] --nx=[121,145,121] --ttRank=32 --epochs=10
